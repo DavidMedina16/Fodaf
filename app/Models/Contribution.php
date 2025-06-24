@@ -1,27 +1,24 @@
-<?php // Inicio del archivo PHP
+<?php
 
-namespace App\Models; // Espacio de nombres de los modelos
+namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory; // Trait para usar fábricas en tests
-use Illuminate\Database\Eloquent\Model; // Clase base de los modelos Eloquent
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Contribution extends Model // Modelo que representa una contribución
+class Contribution extends Model
 {
-    use HasFactory; // Habilita la fábrica de este modelo
+    use HasFactory;
+    protected $fillable = ['user_id', 'quantity', 'created_by'];
 
-    protected $fillable = [ // Atributos asignables en masa
-        'user_id', // Identificador del usuario que aporta
-        'quantity', // Cantidad aportada
-        'created_by', // Usuario que registró la contribución
-    ];
-
-    public function user() // Relación con el usuario al que pertenece la contribución
+    public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class); // Una contribución pertenece a un usuario
+        return $this->belongsTo(User::class);
     }
 
-    public function creator() // Relación con el usuario que la creó
+    public function creator(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'created_by'); // Pertenece a un usuario usando la clave created_by
+        return $this->belongsTo(User::class, 'created_by');
     }
 }

@@ -1,20 +1,19 @@
-<?php // Inicio del archivo PHP
+<?php
 
-namespace App\Models; // Espacio de nombres de los modelos
+namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory; // Trait para usar fábricas en tests
-use Illuminate\Database\Eloquent\Model; // Clase base de los modelos Eloquent
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-class Role extends Model // Modelo que representa un rol de usuario
+class Role extends Model
 {
-    use HasFactory; // Habilita la fábrica de este modelo
+    use HasFactory;
 
-    protected $fillable = [ // Atributos asignables en masa
-        'name', // Nombre del rol
-    ];
+    protected $fillable = ['name'];
 
-    public function users() // Relación de muchos a muchos con usuarios
+    public function users(): BelongsToMany
     {
-        return $this->belongsToMany(User::class); // Un rol puede pertenecer a varios usuarios
+        return $this->belongsToMany(User::class, 'user_role', 'role_id', 'user_id');
     }
 }

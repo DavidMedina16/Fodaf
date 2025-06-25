@@ -1,5 +1,6 @@
 <x-layouts.guest> {{-- Envuelve el contenido en el layout para invitados --}}
-    <form method="POST" action="#" class="w-full max-w-sm bg-white p-6 rounded shadow"> {{-- Inicio del formulario --}}
+    <form method="POST" action="{{ route('login.submit') }}" class="w-full max-w-sm bg-white p-6 rounded shadow"> {{-- Inicio del formulario --}}
+        @csrf {{-- Protección CSRF --}}
         <h1 class="text-2xl font-semibold mb-6 text-center">Iniciar Sesión</h1> {{-- Título del formulario --}}
         <div class="mb-4"> {{-- Grupo del correo electrónico --}}
             <label class="block text-sm mb-1" for="email">Correo electrónico</label> {{-- Etiqueta del email --}}

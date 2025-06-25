@@ -64,3 +64,21 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+## Puesta en marcha
+
+Para poner en funcionamiento el proyecto se deben ejecutar los siguientes comandos desde la raíz:
+
+```bash
+composer install
+npm install
+php artisan migrate
+php artisan serve
+```
+
+Para lanzar las pruebas automatizadas usa:
+
+```bash
+php artisan test
+```
+

@@ -31,7 +31,8 @@ class AuthController extends Controller
         // Iniciamos sesión automáticamente
         Auth::login($user);
 
-        return redirect('/');
+        // Redirigimos al usuario a la página de inicio
+        return redirect('/home');
     }
 
     /**
@@ -50,7 +51,8 @@ class AuthController extends Controller
             // Regeneramos la sesión por seguridad
             $request->session()->regenerate();
 
-            return redirect()->intended('/');
+            // Redireccionamos al destino previsto o a la página de inicio
+            return redirect()->intended('/home');
         }
 
         // Si falló la autenticación, regresamos con un error

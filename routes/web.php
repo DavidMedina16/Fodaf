@@ -17,3 +17,8 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout'); // Ci
 
 // Ruta protegida que muestra la página de inicio
 Route::view('/home', 'home')->middleware('auth')->name('home');
+
+// Vista con el listado de socios
+Route::get('/socios', [\App\Http\Controllers\SocioController::class, 'index'])
+    ->middleware('auth')
+    ->name('socios.index');

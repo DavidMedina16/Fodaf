@@ -1,18 +1,36 @@
-<x-layouts.app> {{-- Usamos el layout principal de la aplicación --}}
-    {{-- Botones para agregar un nuevo socio y acceder a la junta directiva --}}
-    <div class="mb-6 flex justify-end space-x-2"> {{-- Contenedor de los botones alineados a la derecha --}}
-        <a href="{{ route('register') }}" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Agregar Socio</a> {{-- Enlace para registrar a un nuevo socio --}}
-        <a href="#" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">Junta Directiva</a> {{-- Enlace para ver la junta directiva --}}
+<x-layouts.app>
+    {{-- Barra de búsqueda --}}
+    <form method="GET" action="{{ route('socios.index') }}" class="mb-6 flex justify-between">
+        <input type="text" name="search" placeholder="Buscar socio..." value="{{ request('search') }}"
+               class="px-4 py-2 border rounded w-full max-w-md">
+        <button type="submit" class="ml-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Buscar</button>
+    </form>
+
+    {{-- Listado de socios --}}
+    <div class="grid gap-6 md:grid-cols-3">
+        @forelse ($usuarios as $usuario)
+            <div class="bg-white p-4 rounded shadow text-center">
+                <img src="{{ $usuario->photo_url ?? 'https://via.placeholder.com/150' }}" alt="Foto de {{ $usuario->name }}"
+                     class="w-32 h-32 mx-auto rounded-full mb-4">
+                <h3 class="text-lg font-semibold">{{ $usuario->name }}</h3>
+                <p class="text-gray-500">{{ $usuario->roles->pluck('name')->implode(', ') ?: 'Sin rol' }}</p>
+                <p class="text-gray-400 text-sm">{{ $usuario->email }}</p>
+{{--                <div class="mt-4 flex justify-center space-x-2">--}}
+{{--                    <a href="{{ route('socios.edit', $usuario) }}" class="px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600">Editar</a>--}}
+{{--                    <form method="POST" action="{{ route('socios.destroy', $usuario) }}">--}}
+{{--                        @csrf--}}
+{{--                        @method('DELETE')--}}
+{{--                        <button type="submit" class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700">Eliminar</button>--}}
+{{--                    </form>--}}
+{{--                </div>--}}
+            </div>
+        @empty
+            <p class="col-span-3 text-center text-gray-500">No se encontraron socios.</p>
+        @endforelse
     </div>
 
-    {{-- Listado de socios a manera de tarjetas --}}
-    <div class="grid gap-6 md:grid-cols-3"> {{-- Grid responsiva para acomodar las tarjetas --}}
-        @foreach ($usuarios as $usuario) {{-- Recorremos cada usuario que recibimos del controlador --}}
-            <div class="bg-white p-4 rounded shadow text-center"> {{-- Tarjeta individual del socio --}}
-                <img src="https://via.placeholder.com/150" alt="Foto de {{ $usuario->name }}" class="w-32 h-32 mx-auto rounded-full mb-4"> {{-- Fotografía del socio --}}
-                <h3 class="text-lg font-semibold">{{ $usuario->name }}</h3> {{-- Mostramos el nombre del socio --}}
-                <p class="text-gray-500">{{ $usuario->roles->pluck('name')->implode(', ') ?: 'Sin rol' }}</p> {{-- Mostramos sus roles o "Sin rol" si no tiene --}}
-            </div>
-        @endforeach {{-- Fin del recorrido de usuarios --}}
-    </div>
+    {{-- Paginación --}}
+{{--    <div class="mt-6">--}}
+{{--        {{ $usuarios->links() }}--}}
+{{--    </div>--}}
 </x-layouts.app>

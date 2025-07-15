@@ -17,6 +17,9 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'phone',
+        'address',
+        'birth_date',
     ];
     protected $hidden = [
         'password',
@@ -27,9 +30,10 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'birth_date' => 'date',
         ];
     }
-    protected function contributions(): HasMany
+    public function contributions(): HasMany
     {
         return $this->hasMany(Contribution::class);
     }
@@ -40,5 +44,14 @@ class User extends Authenticatable
     public function roles(): BelongsToMany
     {
         return $this->belongsToMany(Role::class, 'user_role', 'user_id', 'role_id');
+    }
+
+    /**
+     * Obtiene la URL de la imagen de perfil del usuario.
+     * Si no tiene foto, retorna la imagen por defecto.
+     */
+    public function getProfileImageUrlAttribute(): string
+    {
+        return $this->photo_url ?? asset('user.png');
     }
 }

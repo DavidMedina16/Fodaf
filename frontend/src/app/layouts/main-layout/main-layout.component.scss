@@ -1,0 +1,28 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.main-layout {
+  display: flex;
+  min-height: 100vh;
+
+  &__content {
+    @include flex-column;
+    flex: 1;
+    margin-left: $sidebar-width;
+    min-width: 0;
+
+    @include media-down(lg) {
+      margin-left: 0;
+    }
+  }
+
+  &__main {
+    flex: 1;
+    padding: $spacing-6;
+    overflow-x: hidden;
+
+    @include media-down(md) {
+      padding: $spacing-4;
+    }
+  }
+}

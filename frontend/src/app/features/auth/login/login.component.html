@@ -1,0 +1,71 @@
+<div class="login">
+  <div class="login__header">
+    <!-- Mobile logo (visible only on small screens) -->
+    <div class="login__mobile-logo">
+      <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+      </svg>
+    </div>
+    <h1 class="login__title">Iniciar Sesión</h1>
+    <p class="login__subtitle">Ingresa tus credenciales para continuar</p>
+  </div>
+
+  @if (error()) {
+    <div class="login__error">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="15" y1="9" x2="9" y2="15"/>
+        <line x1="9" y1="9" x2="15" y2="15"/>
+      </svg>
+      {{ error() }}
+    </div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="login__form">
+    <app-form-field
+      label="Correo electrónico"
+      [required]="true"
+      [error]="getFieldError('email')"
+    >
+      <app-input
+        type="email"
+        formControlName="email"
+        placeholder="tu@email.com"
+        autocomplete="email"
+        [hasError]="!!getFieldError('email')"
+      ></app-input>
+    </app-form-field>
+
+    <app-form-field
+      label="Contraseña"
+      [required]="true"
+      [error]="getFieldError('password')"
+    >
+      <app-input
+        type="password"
+        formControlName="password"
+        placeholder="Ingresa tu contraseña"
+        autocomplete="current-password"
+        [hasError]="!!getFieldError('password')"
+      ></app-input>
+    </app-form-field>
+
+    <div class="login__options">
+      <label class="login__remember">
+        <input type="checkbox" />
+        <span>Recordarme</span>
+      </label>
+      <a href="#" class="login__forgot">¿Olvidaste tu contraseña?</a>
+    </div>
+
+    <app-button
+      type="submit"
+      variant="primary"
+      [fullWidth]="true"
+      [loading]="loading()"
+      [disabled]="form.invalid"
+    >
+      Iniciar Sesión
+    </app-button>
+  </form>
+</div>

@@ -1,0 +1,40 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.select-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.select {
+  @include input-base;
+  appearance: none;
+  cursor: pointer;
+  padding-right: $spacing-10;
+
+  &--error {
+    @include input-error;
+  }
+
+  &--placeholder {
+    color: $input-placeholder-color;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+}
+
+.select-arrow {
+  position: absolute;
+  right: $spacing-3;
+  top: 50%;
+  transform: translateY(-50%);
+  color: $text-muted;
+  pointer-events: none;
+  transition: transform $transition-fast;
+
+  .select:focus + & {
+    color: $primary;
+  }
+}

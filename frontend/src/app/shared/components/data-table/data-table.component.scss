@@ -1,0 +1,143 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.data-table-container {
+  @include card;
+  overflow: hidden;
+}
+
+.data-table-loading {
+  @include flex-center;
+  padding: $spacing-12;
+}
+
+.data-table-wrapper {
+  overflow-x: auto;
+  @include scrollbar-custom;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th, td {
+    padding: $spacing-3 $spacing-4;
+    text-align: left;
+  }
+
+  th {
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+    color: $text-secondary;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background-color: $gray-50;
+    border-bottom: $border-width solid $border-color;
+    white-space: nowrap;
+
+    &.sortable {
+      cursor: pointer;
+      user-select: none;
+      transition: background-color $transition-fast;
+
+      &:hover {
+        background-color: $gray-100;
+      }
+    }
+
+    &.sorted {
+      color: $primary;
+    }
+
+    .th-content {
+      display: inline-flex;
+      align-items: center;
+      gap: $spacing-1;
+    }
+
+    .sort-icon {
+      display: inline-flex;
+    }
+  }
+
+  td {
+    font-size: $font-size-sm;
+    color: $text-primary;
+    border-bottom: $border-width solid $border-color-light;
+  }
+
+  tbody tr {
+    transition: background-color $transition-fast;
+
+    &:hover {
+      background-color: $gray-50;
+    }
+
+    &:last-child td {
+      border-bottom: none;
+    }
+  }
+
+  .text-left { text-align: left; }
+  .text-center { text-align: center; }
+  .text-right { text-align: right; }
+}
+
+.data-table-pagination {
+  @include flex-between;
+  padding: $spacing-3 $spacing-4;
+  border-top: $border-width solid $border-color-light;
+  background-color: $gray-50;
+
+  @include media-down(sm) {
+    flex-direction: column;
+    gap: $spacing-3;
+  }
+}
+
+.pagination-info {
+  font-size: $font-size-sm;
+  color: $text-secondary;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: $spacing-1;
+}
+
+.pagination-btn {
+  @include reset-button;
+  @include flex-center;
+  min-width: 32px;
+  height: 32px;
+  padding: 0 $spacing-2;
+  font-size: $font-size-sm;
+  color: $text-secondary;
+  border-radius: $border-radius-base;
+  transition: all $transition-fast;
+
+  &:hover:not(:disabled) {
+    background-color: $gray-200;
+    color: $text-primary;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &.active {
+    background-color: $primary;
+    color: white;
+
+    &:hover {
+      background-color: $primary-dark;
+    }
+  }
+}
+
+.pagination-ellipsis {
+  padding: 0 $spacing-2;
+  color: $text-muted;
+}

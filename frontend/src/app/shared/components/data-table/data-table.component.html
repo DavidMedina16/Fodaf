@@ -1,0 +1,115 @@
+<div class="data-table-container">
+  @if (loading()) {
+    <div class="data-table-loading">
+      <app-loading-spinner size="lg" text="Cargando datos..."></app-loading-spinner>
+    </div>
+  } @else if (data().length === 0) {
+    <app-empty-state
+      [title]="emptyTitle()"
+      [description]="emptyDescription()"
+      icon="folder"
+    ></app-empty-state>
+  } @else {
+    <div class="data-table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            @for (column of columns(); track column.key) {
+              <th
+                [style.width]="column.width || 'auto'"
+                [class.sortable]="column.sortable"
+                [class.sorted]="sortColumn() === column.key"
+                [class.text-left]="column.align === 'left' || !column.align"
+                [class.text-center]="column.align === 'center'"
+                [class.text-right]="column.align === 'right'"
+                (click)="onSort(column)"
+              >
+                <span class="th-content">
+                  {{ column.header }}
+                  @if (column.sortable) {
+                    <span class="sort-icon">
+                      @if (sortColumn() === column.key) {
+                        @if (sortDirection() === 'asc') {
+                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 19V5M5 12l7-7 7 7"/>
+                          </svg>
+                        } @else {
+                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 5v14M5 12l7 7 7-7"/>
+                          </svg>
+                        }
+                      } @else {
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" opacity="0.3">
+                          <path d="M12 5v14M5 12l7 7 7-7"/>
+                        </svg>
+                      }
+                    </span>
+                  }
+                </span>
+              </th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of data(); track trackByIndex($index)) {
+            <tr (click)="onRowClick(row)">
+              @for (column of columns(); track column.key) {
+                <td
+                  [class.text-left]="column.align === 'left' || !column.align"
+                  [class.text-center]="column.align === 'center'"
+                  [class.text-right]="column.align === 'right'"
+                >
+                  {{ getCellValue(row, column) }}
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if (paginated() && totalPages() > 1) {
+      <div class="data-table-pagination">
+        <span class="pagination-info">
+          Mostrando {{ startItem() }} - {{ endItem() }} de {{ totalItems() }}
+        </span>
+
+        <div class="pagination-controls">
+          <button
+            class="pagination-btn"
+            [disabled]="currentPage() === 1"
+            (click)="onPageChange(currentPage() - 1)"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="15 18 9 12 15 6"/>
+            </svg>
+          </button>
+
+          @for (page of pageNumbers(); track $index) {
+            @if (isNumber(page)) {
+              <button
+                class="pagination-btn"
+                [class.active]="page === currentPage()"
+                (click)="onPageChange(page)"
+              >
+                {{ page }}
+              </button>
+            } @else {
+              <span class="pagination-ellipsis">...</span>
+            }
+          }
+
+          <button
+            class="pagination-btn"
+            [disabled]="currentPage() === totalPages()"
+            (click)="onPageChange(currentPage() + 1)"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    }
+  }
+</div>

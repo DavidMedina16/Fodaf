@@ -1,0 +1,38 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.input {
+  @include input-base;
+
+  &--error {
+    @include input-error;
+  }
+
+  &--has-suffix {
+    padding-right: $spacing-10;
+  }
+}
+
+.input-toggle-password {
+  @include reset-button;
+  position: absolute;
+  right: $spacing-3;
+  top: 50%;
+  transform: translateY(-50%);
+  color: $text-muted;
+  transition: color $transition-fast;
+
+  &:hover {
+    color: $text-primary;
+  }
+
+  &:focus {
+    outline: none;
+    color: $primary;
+  }
+}

@@ -1,0 +1,31 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.empty-state {
+  @include flex-column-center;
+  padding: $spacing-12 $spacing-6;
+  text-align: center;
+
+  &__icon {
+    color: $gray-400;
+    margin-bottom: $spacing-4;
+  }
+
+  &__title {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-semibold;
+    color: $text-primary;
+    margin: 0 0 $spacing-2;
+  }
+
+  &__description {
+    font-size: $font-size-sm;
+    color: $text-secondary;
+    margin: 0;
+    max-width: 400px;
+  }
+
+  &__action {
+    margin-top: $spacing-6;
+  }
+}

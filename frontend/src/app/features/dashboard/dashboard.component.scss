@@ -1,0 +1,50 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.dashboard {
+  &__header {
+    margin-bottom: $spacing-6;
+  }
+
+  &__title {
+    font-size: $font-size-2xl;
+    font-weight: $font-weight-bold;
+    color: $text-primary;
+    margin: 0 0 $spacing-1;
+  }
+
+  &__subtitle {
+    font-size: $font-size-sm;
+    color: $text-secondary;
+    margin: 0;
+  }
+
+  &__stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: $spacing-4;
+    margin-bottom: $spacing-6;
+  }
+
+  &__content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: $spacing-4;
+
+    @include media-down(md) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  &__activity,
+  &__upcoming {
+    min-height: 300px;
+  }
+
+  &__placeholder {
+    color: $text-muted;
+    font-size: $font-size-sm;
+    text-align: center;
+    padding: $spacing-8;
+  }
+}

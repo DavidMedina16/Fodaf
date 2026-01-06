@@ -1,0 +1,27 @@
+<div class="form-field" [class.form-field--error]="error()">
+  @if (label()) {
+    <label class="form-field__label" [attr.for]="fieldId()">
+      {{ label() }}
+      @if (required()) {
+        <span class="form-field__required">*</span>
+      }
+    </label>
+  }
+
+  <div class="form-field__control">
+    <ng-content></ng-content>
+  </div>
+
+  @if (error()) {
+    <span class="form-field__error">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="12"/>
+        <line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      {{ error() }}
+    </span>
+  } @else if (hint()) {
+    <span class="form-field__hint">{{ hint() }}</span>
+  }
+</div>

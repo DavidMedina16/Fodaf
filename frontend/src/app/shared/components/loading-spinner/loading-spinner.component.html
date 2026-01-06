@@ -1,0 +1,17 @@
+@if (fullPage()) {
+  <div class="spinner-overlay">
+    <div class="spinner-container">
+      <div class="spinner spinner--{{ size() }} spinner--{{ color() }}"></div>
+      @if (text()) {
+        <span class="spinner-text">{{ text() }}</span>
+      }
+    </div>
+  </div>
+} @else {
+  <div class="spinner-inline">
+    <div class="spinner spinner--{{ size() }} spinner--{{ color() }}"></div>
+    @if (text()) {
+      <span class="spinner-text">{{ text() }}</span>
+    }
+  </div>
+}

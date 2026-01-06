@@ -1,0 +1,17 @@
+<div class="main-layout">
+  <app-sidebar
+    [isOpen]="sidebarOpen()"
+    (closeSidebar)="closeSidebar()"
+  ></app-sidebar>
+
+  <div class="main-layout__content">
+    <app-header (toggleSidebar)="toggleSidebar()"></app-header>
+
+    <main class="main-layout__main">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>
+
+<!-- Global toast notifications -->
+<app-toast></app-toast>

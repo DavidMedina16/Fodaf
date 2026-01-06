@@ -1,0 +1,167 @@
+// ==========================================================================
+// FODAF - CSS Reset
+// ==========================================================================
+
+@use 'variables' as *;
+
+// --------------------------------------------------------------------------
+// Box sizing
+// --------------------------------------------------------------------------
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+// --------------------------------------------------------------------------
+// Root & Body
+// --------------------------------------------------------------------------
+
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: $font-family-base;
+  font-size: $font-size-base;
+  font-weight: $font-weight-normal;
+  line-height: $line-height-base;
+  color: $text-primary;
+  background-color: $bg-body;
+  min-height: 100vh;
+}
+
+// --------------------------------------------------------------------------
+// Typography reset
+// --------------------------------------------------------------------------
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  font-weight: $font-weight-semibold;
+}
+
+p {
+  margin: 0;
+}
+
+// --------------------------------------------------------------------------
+// Links
+// --------------------------------------------------------------------------
+
+a {
+  color: $text-link;
+  text-decoration: none;
+  transition: color $transition-fast;
+
+  &:hover {
+    color: $primary-dark;
+  }
+}
+
+// --------------------------------------------------------------------------
+// Lists
+// --------------------------------------------------------------------------
+
+ul, ol {
+  margin: 0;
+  padding: 0;
+}
+
+// --------------------------------------------------------------------------
+// Images
+// --------------------------------------------------------------------------
+
+img, svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+// --------------------------------------------------------------------------
+// Forms
+// --------------------------------------------------------------------------
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  margin: 0;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  padding: 0;
+}
+
+input,
+textarea {
+  &:focus {
+    outline: none;
+  }
+}
+
+// Remove default appearance
+input[type="search"]::-webkit-search-decoration,
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-results-button,
+input[type="search"]::-webkit-search-results-decoration {
+  display: none;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+// --------------------------------------------------------------------------
+// Tables
+// --------------------------------------------------------------------------
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+// --------------------------------------------------------------------------
+// Misc
+// --------------------------------------------------------------------------
+
+hr {
+  margin: 0;
+  border: 0;
+  border-top: $border-width solid $border-color;
+}
+
+// Remove default focus styles for mouse users
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+// Keep focus styles for keyboard users
+:focus-visible {
+  outline: 2px solid $primary;
+  outline-offset: 2px;
+}
+
+// Selection
+::selection {
+  background-color: rgba($primary, 0.2);
+  color: $text-primary;
+}

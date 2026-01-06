@@ -1,0 +1,95 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.card {
+  @include card;
+  display: flex;
+  flex-direction: column;
+
+  &--elevated {
+    @include card-elevated;
+  }
+
+  &--bordered {
+    @include card-bordered;
+    box-shadow: none;
+  }
+
+  &--clickable {
+    cursor: pointer;
+    transition: transform $transition-fast, box-shadow $transition-fast;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: $shadow-md;
+    }
+  }
+
+  // Padding variants
+  &--padding-none {
+    .card__header,
+    .card__body {
+      padding: 0;
+    }
+  }
+
+  &--padding-sm {
+    .card__header,
+    .card__body {
+      padding: $spacing-3;
+    }
+  }
+
+  &--padding-md {
+    .card__header,
+    .card__body {
+      padding: $spacing-4;
+    }
+  }
+
+  &--padding-lg {
+    .card__header,
+    .card__body {
+      padding: $spacing-6;
+    }
+  }
+
+  &__header {
+    @include flex-between;
+    flex-wrap: wrap;
+    gap: $spacing-2;
+    border-bottom: $border-width solid $border-color-light;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: $font-size-lg;
+    font-weight: $font-weight-semibold;
+    color: $text-primary;
+  }
+
+  &__subtitle {
+    margin: 0;
+    font-size: $font-size-sm;
+    color: $text-secondary;
+    width: 100%;
+  }
+
+  &__header-actions {
+    display: flex;
+    gap: $spacing-2;
+    margin-left: auto;
+  }
+
+  &__body {
+    flex: 1;
+  }
+}
+
+// Card footer styles (content projection)
+::ng-deep [card-footer] {
+  padding: $spacing-4;
+  border-top: $border-width solid $border-color-light;
+  background-color: $gray-50;
+  border-radius: 0 0 $border-radius-lg $border-radius-lg;
+}

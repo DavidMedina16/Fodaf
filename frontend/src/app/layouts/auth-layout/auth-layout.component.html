@@ -1,0 +1,68 @@
+<div class="auth-layout">
+  <div class="auth-layout__side">
+    <div class="auth-layout__branding">
+      <div class="auth-layout__logo">
+        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+        </svg>
+      </div>
+      <h1 class="auth-layout__title">FODAF</h1>
+      <p class="auth-layout__subtitle">Fondo de Ahorro Familiar</p>
+    </div>
+
+    <div class="auth-layout__features">
+      <div class="auth-layout__feature">
+        <div class="auth-layout__feature-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+        </div>
+        <div>
+          <h3>Gestión de Miembros</h3>
+          <p>Administra los integrantes del fondo familiar</p>
+        </div>
+      </div>
+
+      <div class="auth-layout__feature">
+        <div class="auth-layout__feature-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+            <line x1="16" y1="2" x2="16" y2="6"/>
+            <line x1="8" y1="2" x2="8" y2="6"/>
+            <line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
+        </div>
+        <div>
+          <h3>Control de Pagos</h3>
+          <p>Seguimiento mensual de cuotas y aportes</p>
+        </div>
+      </div>
+
+      <div class="auth-layout__feature">
+        <div class="auth-layout__feature-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="20" x2="18" y2="10"/>
+            <line x1="12" y1="20" x2="12" y2="4"/>
+            <line x1="6" y1="20" x2="6" y2="14"/>
+          </svg>
+        </div>
+        <div>
+          <h3>Préstamos e Inversiones</h3>
+          <p>Gestiona préstamos y CDTs del fondo</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="auth-layout__content">
+    <div class="auth-layout__form-container">
+      <router-outlet></router-outlet>
+    </div>
+    <p class="auth-layout__footer">
+      &copy; {{ currentYear }} FODAF - Fondo de Ahorro Familiar
+    </p>
+  </div>
+</div>

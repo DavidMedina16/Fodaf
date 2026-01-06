@@ -1,0 +1,269 @@
+// ==========================================================================
+// FODAF - Utility Classes
+// ==========================================================================
+
+@use 'variables' as *;
+@use 'mixins' as *;
+
+// --------------------------------------------------------------------------
+// Display
+// --------------------------------------------------------------------------
+
+.d-none { display: none; }
+.d-block { display: block; }
+.d-inline { display: inline; }
+.d-inline-block { display: inline-block; }
+.d-flex { display: flex; }
+.d-inline-flex { display: inline-flex; }
+.d-grid { display: grid; }
+
+// Responsive display
+@each $bp, $value in $breakpoints {
+  @if $bp != 'xs' {
+    @include media-up($bp) {
+      .d-#{$bp}-none { display: none; }
+      .d-#{$bp}-block { display: block; }
+      .d-#{$bp}-flex { display: flex; }
+      .d-#{$bp}-grid { display: grid; }
+    }
+  }
+}
+
+// --------------------------------------------------------------------------
+// Flexbox utilities
+// --------------------------------------------------------------------------
+
+.flex-row { flex-direction: row; }
+.flex-column { flex-direction: column; }
+.flex-wrap { flex-wrap: wrap; }
+.flex-nowrap { flex-wrap: nowrap; }
+
+.justify-start { justify-content: flex-start; }
+.justify-end { justify-content: flex-end; }
+.justify-center { justify-content: center; }
+.justify-between { justify-content: space-between; }
+.justify-around { justify-content: space-around; }
+.justify-evenly { justify-content: space-evenly; }
+
+.items-start { align-items: flex-start; }
+.items-end { align-items: flex-end; }
+.items-center { align-items: center; }
+.items-baseline { align-items: baseline; }
+.items-stretch { align-items: stretch; }
+
+.flex-1 { flex: 1; }
+.flex-auto { flex: auto; }
+.flex-none { flex: none; }
+.flex-grow { flex-grow: 1; }
+.flex-shrink-0 { flex-shrink: 0; }
+
+// --------------------------------------------------------------------------
+// Gap utilities
+// --------------------------------------------------------------------------
+
+.gap-0 { gap: $spacing-0; }
+.gap-1 { gap: $spacing-1; }
+.gap-2 { gap: $spacing-2; }
+.gap-3 { gap: $spacing-3; }
+.gap-4 { gap: $spacing-4; }
+.gap-5 { gap: $spacing-5; }
+.gap-6 { gap: $spacing-6; }
+.gap-8 { gap: $spacing-8; }
+
+// --------------------------------------------------------------------------
+// Margin utilities
+// --------------------------------------------------------------------------
+
+$spacing-map: (
+  '0': $spacing-0,
+  '1': $spacing-1,
+  '2': $spacing-2,
+  '3': $spacing-3,
+  '4': $spacing-4,
+  '5': $spacing-5,
+  '6': $spacing-6,
+  '8': $spacing-8,
+  'auto': auto
+);
+
+@each $key, $value in $spacing-map {
+  .m-#{$key} { margin: $value; }
+  .mt-#{$key} { margin-top: $value; }
+  .mr-#{$key} { margin-right: $value; }
+  .mb-#{$key} { margin-bottom: $value; }
+  .ml-#{$key} { margin-left: $value; }
+  .mx-#{$key} { margin-left: $value; margin-right: $value; }
+  .my-#{$key} { margin-top: $value; margin-bottom: $value; }
+}
+
+// --------------------------------------------------------------------------
+// Padding utilities
+// --------------------------------------------------------------------------
+
+@each $key, $value in $spacing-map {
+  @if $key != 'auto' {
+    .p-#{$key} { padding: $value; }
+    .pt-#{$key} { padding-top: $value; }
+    .pr-#{$key} { padding-right: $value; }
+    .pb-#{$key} { padding-bottom: $value; }
+    .pl-#{$key} { padding-left: $value; }
+    .px-#{$key} { padding-left: $value; padding-right: $value; }
+    .py-#{$key} { padding-top: $value; padding-bottom: $value; }
+  }
+}
+
+// --------------------------------------------------------------------------
+// Width & Height
+// --------------------------------------------------------------------------
+
+.w-full { width: 100%; }
+.w-auto { width: auto; }
+.w-screen { width: 100vw; }
+.max-w-full { max-width: 100%; }
+
+.h-full { height: 100%; }
+.h-auto { height: auto; }
+.h-screen { height: 100vh; }
+.min-h-screen { min-height: 100vh; }
+
+// --------------------------------------------------------------------------
+// Position
+// --------------------------------------------------------------------------
+
+.relative { position: relative; }
+.absolute { position: absolute; }
+.fixed { position: fixed; }
+.sticky { position: sticky; }
+
+.inset-0 {
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+// --------------------------------------------------------------------------
+// Border radius
+// --------------------------------------------------------------------------
+
+.rounded-none { border-radius: 0; }
+.rounded-sm { border-radius: $border-radius-sm; }
+.rounded { border-radius: $border-radius-base; }
+.rounded-md { border-radius: $border-radius-md; }
+.rounded-lg { border-radius: $border-radius-lg; }
+.rounded-xl { border-radius: $border-radius-xl; }
+.rounded-full { border-radius: $border-radius-full; }
+
+// --------------------------------------------------------------------------
+// Shadows
+// --------------------------------------------------------------------------
+
+.shadow-none { box-shadow: none; }
+.shadow-xs { box-shadow: $shadow-xs; }
+.shadow-sm { box-shadow: $shadow-sm; }
+.shadow { box-shadow: $shadow-base; }
+.shadow-md { box-shadow: $shadow-md; }
+.shadow-lg { box-shadow: $shadow-lg; }
+.shadow-xl { box-shadow: $shadow-xl; }
+
+// --------------------------------------------------------------------------
+// Background colors
+// --------------------------------------------------------------------------
+
+.bg-white { background-color: white; }
+.bg-body { background-color: $bg-body; }
+.bg-primary { background-color: $primary; }
+.bg-secondary { background-color: $secondary; }
+.bg-success { background-color: $success; }
+.bg-warning { background-color: $warning; }
+.bg-danger { background-color: $danger; }
+.bg-info { background-color: $info; }
+
+.bg-gray-50 { background-color: $gray-50; }
+.bg-gray-100 { background-color: $gray-100; }
+.bg-gray-200 { background-color: $gray-200; }
+.bg-gray-800 { background-color: $gray-800; }
+.bg-gray-900 { background-color: $gray-900; }
+
+// --------------------------------------------------------------------------
+// Borders
+// --------------------------------------------------------------------------
+
+.border { border: $border-width solid $border-color; }
+.border-0 { border: 0; }
+.border-t { border-top: $border-width solid $border-color; }
+.border-r { border-right: $border-width solid $border-color; }
+.border-b { border-bottom: $border-width solid $border-color; }
+.border-l { border-left: $border-width solid $border-color; }
+
+// --------------------------------------------------------------------------
+// Overflow
+// --------------------------------------------------------------------------
+
+.overflow-hidden { overflow: hidden; }
+.overflow-auto { overflow: auto; }
+.overflow-scroll { overflow: scroll; }
+.overflow-x-auto { overflow-x: auto; }
+.overflow-y-auto { overflow-y: auto; }
+
+// --------------------------------------------------------------------------
+// Cursor
+// --------------------------------------------------------------------------
+
+.cursor-pointer { cursor: pointer; }
+.cursor-not-allowed { cursor: not-allowed; }
+.cursor-default { cursor: default; }
+
+// --------------------------------------------------------------------------
+// User select
+// --------------------------------------------------------------------------
+
+.select-none { user-select: none; }
+.select-text { user-select: text; }
+.select-all { user-select: all; }
+
+// --------------------------------------------------------------------------
+// Visibility
+// --------------------------------------------------------------------------
+
+.visible { visibility: visible; }
+.invisible { visibility: hidden; }
+
+.opacity-0 { opacity: 0; }
+.opacity-50 { opacity: 0.5; }
+.opacity-100 { opacity: 1; }
+
+// --------------------------------------------------------------------------
+// Screen reader only
+// --------------------------------------------------------------------------
+
+.sr-only {
+  @include visually-hidden;
+}
+
+// --------------------------------------------------------------------------
+// Transitions
+// --------------------------------------------------------------------------
+
+.transition {
+  transition: all $transition-base;
+}
+
+.transition-fast {
+  transition: all $transition-fast;
+}
+
+.transition-slow {
+  transition: all $transition-slow;
+}
+
+// --------------------------------------------------------------------------
+// Z-index
+// --------------------------------------------------------------------------
+
+.z-0 { z-index: 0; }
+.z-10 { z-index: 10; }
+.z-20 { z-index: 20; }
+.z-30 { z-index: 30; }
+.z-40 { z-index: 40; }
+.z-50 { z-index: 50; }

@@ -37,33 +37,54 @@ Aplicación web para gestionar un fondo de ahorro comunitario familiar. El siste
 
 ```
 Fodaf/
-├── backend/                 # API REST NestJS
+├── backend/                 # API REST NestJS (por implementar)
 │   ├── src/
-│   │   ├── modules/         # Módulos de la aplicación (por crear)
-│   │   │   ├── members/     # Gestión de miembros
-│   │   │   ├── payments/    # Gestión de pagos
-│   │   │   ├── loans/       # Gestión de préstamos
-│   │   │   ├── events/      # Gestión de eventos
-│   │   │   ├── investments/ # Gestión de CDTs
-│   │   │   └── auth/        # Autenticación
-│   │   ├── common/          # Utilidades compartidas
-│   │   └── config/          # Configuración de la app
+│   │   ├── modules/
+│   │   ├── common/
+│   │   └── config/
 │   └── test/
 │
 ├── frontend/                # Aplicación Angular
 │   ├── src/
+│   │   ├── styles/          # Sistema de estilos SCSS
+│   │   │   ├── _variables.scss
+│   │   │   ├── _mixins.scss
+│   │   │   ├── _reset.scss
+│   │   │   ├── _typography.scss
+│   │   │   └── _utilities.scss
 │   │   ├── app/
 │   │   │   ├── core/        # Servicios singleton, guards, interceptors
+│   │   │   │   ├── guards/  # authGuard, guestGuard, roleGuard
+│   │   │   │   ├── interceptors/  # auth, error
+│   │   │   │   ├── models/  # User, Auth, ApiResponse, enums
+│   │   │   │   └── services/  # ApiService, AuthService, StorageService
 │   │   │   ├── shared/      # Componentes reutilizables
-│   │   │   ├── features/    # Módulos de funcionalidad (por crear)
+│   │   │   │   ├── components/
+│   │   │   │   │   ├── button/
+│   │   │   │   │   ├── input/
+│   │   │   │   │   ├── select/
+│   │   │   │   │   ├── form-field/
+│   │   │   │   │   ├── loading-spinner/
+│   │   │   │   │   ├── empty-state/
+│   │   │   │   │   ├── toast/
+│   │   │   │   │   ├── confirm-modal/
+│   │   │   │   │   ├── card/
+│   │   │   │   │   ├── stat-card/
+│   │   │   │   │   └── data-table/
+│   │   │   │   └── services/  # ToastService
+│   │   │   ├── features/    # Módulos de funcionalidad
+│   │   │   │   ├── auth/    # Login
 │   │   │   │   ├── dashboard/
 │   │   │   │   ├── members/
 │   │   │   │   ├── payments/
 │   │   │   │   ├── loans/
 │   │   │   │   ├── events/
 │   │   │   │   └── investments/
-│   │   │   └── layouts/     # Layouts de la aplicación
-│   │   ├── assets/
+│   │   │   └── layouts/
+│   │   │       ├── auth-layout/    # Layout para login
+│   │   │       └── main-layout/    # Layout principal con sidebar
+│   │   │           ├── sidebar/
+│   │   │           └── header/
 │   │   └── environments/
 │   └── public/
 │
@@ -150,17 +171,67 @@ pnpm start            # Servidor de desarrollo
 - Guards para protección de rutas
 - Interceptors para manejo de tokens/errores
 
-## Próximos Pasos
+## Progreso de Desarrollo
 
-1. [ ] Definir y configurar base de datos (PostgreSQL + TypeORM/Prisma)
-2. [ ] Implementar autenticación (JWT)
-3. [ ] Crear módulo de miembros (CRUD)
-4. [ ] Crear módulo de pagos con seguimiento mensual
-5. [ ] Crear módulo de préstamos
-6. [ ] Crear módulo de eventos
-7. [ ] Crear módulo de inversiones CDT
-8. [ ] Crear dashboard con resumen general
-9. [ ] Implementar reportes y estadísticas
+### Sprint 1: Core Foundation ✅
+- [x] Estructura de carpetas escalable
+- [x] Path aliases (@core/*, @shared/*, @features/*, @layouts/*)
+- [x] Modelos TypeScript (User, Auth, ApiResponse, enums)
+- [x] Servicios core (StorageService, ApiService, AuthService)
+- [x] Interceptors HTTP (auth, error)
+- [x] Guards de rutas (auth, guest, role)
+- [x] Configuración de environments
+
+### Sprint 2: UI Foundation ✅
+- [x] Sistema de estilos SCSS (variables, mixins, reset, utilities)
+- [x] Componentes de formulario (Button, Input, Select, FormField)
+- [x] Componentes de feedback (LoadingSpinner, EmptyState, Toast, ConfirmModal)
+- [x] Componentes de datos (Card, StatCard, DataTable con paginación)
+- [x] AuthLayout (pantalla de login con branding)
+- [x] MainLayout (sidebar + header responsive)
+- [x] Rutas base con lazy loading
+- [x] Responsive en móvil y desktop
+
+### Sprint 3: Autenticación y Dashboard
+- [ ] Feature Auth (LoginComponent, validaciones, integración AuthService)
+- [ ] Feature Dashboard (estadísticas, cards resumen, últimos movimientos)
+- [ ] Logout completo (limpiar token, redirigir)
+- **Criterios:** Login funcional, dashboard con info, rutas protegidas
+
+### Sprint 4: Gestión de Miembros
+- [ ] MembersService (CRUD completo)
+- [ ] MembersListComponent con DataTable, búsqueda/filtros
+- [ ] MemberFormComponent (crear/editar con validaciones)
+- [ ] MemberDetailComponent (info, historial aportes, préstamos, multas)
+- [ ] Rutas: /members, /members/new, /members/:id, /members/:id/edit
+- **Criterios:** CRUD completo, validaciones, navegación fluida
+
+### Sprint 5: Gestión de Aportes/Pagos
+- [ ] ContributionsService y modelos
+- [ ] ContributionsListComponent (filtros mes/año/estado, resumen)
+- [ ] ContributionFormComponent (registro de pago, comprobante)
+- [ ] PaymentCalendarComponent (vista mensual, indicadores visuales)
+- **Criterios:** Registrar pagos, ver estado por mes, identificar morosos
+
+### Sprint 6: Gestión de Préstamos
+- [ ] LoansService, LoanInstallmentsService y modelos
+- [ ] LoansListComponent (filtros, resumen)
+- [ ] LoanRequestComponent (calculadora de cuotas, validar límites)
+- [ ] LoanApprovalComponent (aprobar/rechazar solicitudes)
+- [ ] LoanDetailComponent (amortización, registro de cuotas)
+- **Criterios:** Solicitar préstamos, aprobar/rechazar, seguimiento cuotas
+
+### Sprint 7: Multas, Eventos e Inversiones
+- [ ] Módulo Multas (CRUD, integrar con detalle miembro)
+- [ ] Módulo Eventos (CRUD con transacciones)
+- [ ] Módulo Inversiones (CRUD con cálculo de rendimientos)
+- **Criterios:** CRUDs funcionando con sus respectivos cálculos
+
+### Sprint 8: Configuración y Reportes
+- [ ] SettingsComponent (parámetros, gestión roles)
+- [ ] ReportsService (estado fondo, morosidad, préstamos)
+- [ ] Exportación a Excel y PDF
+- **Criterios:** Configuración editable, reportes visuales, exportación funcional
 
 ## Notas Adicionales
 

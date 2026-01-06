@@ -1,0 +1,197 @@
+// ==========================================================================
+// FODAF - Typography
+// ==========================================================================
+
+@use 'variables' as *;
+
+// --------------------------------------------------------------------------
+// Font imports (Inter from Google Fonts)
+// --------------------------------------------------------------------------
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+// --------------------------------------------------------------------------
+// Headings
+// --------------------------------------------------------------------------
+
+.h1, .heading-1 {
+  font-size: $font-size-4xl;
+  font-weight: $font-weight-bold;
+  line-height: $line-height-tight;
+  color: $text-primary;
+}
+
+.h2, .heading-2 {
+  font-size: $font-size-3xl;
+  font-weight: $font-weight-bold;
+  line-height: $line-height-tight;
+  color: $text-primary;
+}
+
+.h3, .heading-3 {
+  font-size: $font-size-2xl;
+  font-weight: $font-weight-semibold;
+  line-height: $line-height-tight;
+  color: $text-primary;
+}
+
+.h4, .heading-4 {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-semibold;
+  line-height: $line-height-base;
+  color: $text-primary;
+}
+
+.h5, .heading-5 {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  line-height: $line-height-base;
+  color: $text-primary;
+}
+
+.h6, .heading-6 {
+  font-size: $font-size-base;
+  font-weight: $font-weight-semibold;
+  line-height: $line-height-base;
+  color: $text-primary;
+}
+
+// --------------------------------------------------------------------------
+// Body text
+// --------------------------------------------------------------------------
+
+.text-lg {
+  font-size: $font-size-lg;
+}
+
+.text-base {
+  font-size: $font-size-base;
+}
+
+.text-sm {
+  font-size: $font-size-sm;
+}
+
+.text-xs {
+  font-size: $font-size-xs;
+}
+
+// --------------------------------------------------------------------------
+// Font weights
+// --------------------------------------------------------------------------
+
+.font-light {
+  font-weight: $font-weight-light;
+}
+
+.font-normal {
+  font-weight: $font-weight-normal;
+}
+
+.font-medium {
+  font-weight: $font-weight-medium;
+}
+
+.font-semibold {
+  font-weight: $font-weight-semibold;
+}
+
+.font-bold {
+  font-weight: $font-weight-bold;
+}
+
+// --------------------------------------------------------------------------
+// Text colors
+// --------------------------------------------------------------------------
+
+.text-primary {
+  color: $text-primary;
+}
+
+.text-secondary {
+  color: $text-secondary;
+}
+
+.text-muted {
+  color: $text-muted;
+}
+
+.text-success {
+  color: $success;
+}
+
+.text-warning {
+  color: $warning;
+}
+
+.text-danger {
+  color: $danger;
+}
+
+.text-info {
+  color: $info;
+}
+
+// --------------------------------------------------------------------------
+// Text alignment
+// --------------------------------------------------------------------------
+
+.text-left {
+  text-align: left;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-right {
+  text-align: right;
+}
+
+// --------------------------------------------------------------------------
+// Text utilities
+// --------------------------------------------------------------------------
+
+.text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.text-uppercase {
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.text-capitalize {
+  text-transform: capitalize;
+}
+
+.text-nowrap {
+  white-space: nowrap;
+}
+
+// --------------------------------------------------------------------------
+// Links
+// --------------------------------------------------------------------------
+
+.link {
+  color: $text-link;
+  text-decoration: none;
+  transition: color $transition-fast;
+
+  &:hover {
+    color: $primary-dark;
+    text-decoration: underline;
+  }
+}
+
+.link-muted {
+  color: $text-muted;
+  text-decoration: none;
+  transition: color $transition-fast;
+
+  &:hover {
+    color: $text-primary;
+  }
+}

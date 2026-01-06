@@ -1,1 +1,10 @@
-/* You can add global styles to this file, and also import other style files */
+// ==========================================================================
+// FODAF - Main Stylesheet
+// ==========================================================================
+
+// Import all style partials
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+@use 'styles/reset';
+@use 'styles/typography';
+@use 'styles/utilities';

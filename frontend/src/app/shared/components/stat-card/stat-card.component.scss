@@ -1,0 +1,119 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.stat-card {
+  @include card;
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-4;
+  padding: $spacing-5;
+
+  &__icon {
+    @include flex-center;
+    width: 48px;
+    height: 48px;
+    border-radius: $border-radius-lg;
+    flex-shrink: 0;
+  }
+
+  &__content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__title {
+    display: block;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    color: $text-secondary;
+    margin-bottom: $spacing-1;
+  }
+
+  &__value {
+    display: block;
+    font-size: $font-size-2xl;
+    font-weight: $font-weight-bold;
+    color: $text-primary;
+    line-height: 1.2;
+  }
+
+  &__footer {
+    display: flex;
+    align-items: center;
+    gap: $spacing-2;
+    margin-top: $spacing-2;
+  }
+
+  &__trend {
+    display: inline-flex;
+    align-items: center;
+    gap: $spacing-1;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-medium;
+    padding: $spacing-1 $spacing-2;
+    border-radius: $border-radius-full;
+
+    &--up {
+      color: $success-dark;
+      background-color: $success-light;
+    }
+
+    &--down {
+      color: $danger-dark;
+      background-color: $danger-light;
+    }
+
+    &--neutral {
+      color: $text-secondary;
+      background-color: $gray-100;
+    }
+  }
+
+  &__subtitle {
+    font-size: $font-size-xs;
+    color: $text-muted;
+  }
+
+  // Variants
+  &--default {
+    .stat-card__icon {
+      background-color: $gray-100;
+      color: $gray-600;
+    }
+  }
+
+  &--primary {
+    .stat-card__icon {
+      background-color: $primary-50;
+      color: $primary;
+    }
+  }
+
+  &--success {
+    .stat-card__icon {
+      background-color: $secondary-50;
+      color: $secondary;
+    }
+  }
+
+  &--warning {
+    .stat-card__icon {
+      background-color: $warning-50;
+      color: $warning;
+    }
+  }
+
+  &--danger {
+    .stat-card__icon {
+      background-color: $danger-50;
+      color: $danger;
+    }
+  }
+
+  &--info {
+    .stat-card__icon {
+      background-color: $info-50;
+      color: $info;
+    }
+  }
+}

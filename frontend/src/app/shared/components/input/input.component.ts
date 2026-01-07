@@ -1,4 +1,4 @@
-import { Component, input, output, forwardRef, signal } from '@angular/core';
+import { Component, input, output, forwardRef, signal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
 
@@ -29,6 +29,7 @@ export class InputComponent implements ControlValueAccessor {
   min = input<number | null>(null);
   max = input<number | null>(null);
   step = input<number | null>(null);
+  initialValue = input<string>('', { alias: 'value' });
 
   inputChange = output<string>();
   inputBlur = output<void>();
@@ -37,6 +38,15 @@ export class InputComponent implements ControlValueAccessor {
   value = signal<string>('');
   showPassword = signal<boolean>(false);
   isFocused = signal<boolean>(false);
+
+  constructor() {
+    effect(() => {
+      const initial = this.initialValue();
+      if (initial !== undefined) {
+        this.value.set(initial);
+      }
+    });
+  }
 
   private onChange: (value: string) => void = () => {};
   private onTouched: () => void = () => {};

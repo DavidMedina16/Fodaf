@@ -7,7 +7,19 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { User } from '../../entities/user.entity';
-import { CreateUserDto, UpdateUserDto } from './dto';
+import { CreateUserDto, UpdateUserDto, FilterUsersDto } from './dto';
+
+export interface PaginatedResult<T> {
+  data: T[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+  };
+}
 
 @Injectable()
 export class UsersService {
@@ -36,7 +48,72 @@ export class UsersService {
     return result as User;
   }
 
-  async findAll(): Promise<User[]> {
+  async findAll(filters?: FilterUsersDto): Promise<PaginatedResult<User>> {
+    const {
+      search,
+      email,
+      isActive,
+      roleId,
+      page = 1,
+      limit = 10,
+      sortBy = 'createdAt',
+      sortOrder = 'DESC',
+    } = filters || {};
+
+    const queryBuilder = this.userRepository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.role', 'role');
+
+    // Filtro de búsqueda (nombre o email)
+    if (search) {
+      queryBuilder.andWhere(
+        '(user.firstName LIKE :search OR user.lastName LIKE :search OR user.email LIKE :search)',
+        { search: `%${search}%` },
+      );
+    }
+
+    // Filtro por email exacto
+    if (email) {
+      queryBuilder.andWhere('user.email LIKE :email', { email: `%${email}%` });
+    }
+
+    // Filtro por estado activo
+    if (isActive !== undefined) {
+      queryBuilder.andWhere('user.isActive = :isActive', { isActive });
+    }
+
+    // Filtro por rol
+    if (roleId) {
+      queryBuilder.andWhere('user.roleId = :roleId', { roleId });
+    }
+
+    // Ordenamiento
+    const validSortColumns = ['firstName', 'lastName', 'email', 'createdAt', 'isActive'];
+    const sortColumn = validSortColumns.includes(sortBy) ? sortBy : 'createdAt';
+    queryBuilder.orderBy(`user.${sortColumn}`, sortOrder);
+
+    // Paginación
+    const total = await queryBuilder.getCount();
+    const totalPages = Math.ceil(total / limit);
+
+    queryBuilder.skip((page - 1) * limit).take(limit);
+
+    const data = await queryBuilder.getMany();
+
+    return {
+      data,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPreviousPage: page > 1,
+      },
+    };
+  }
+
+  async findAllSimple(): Promise<User[]> {
     return this.userRepository.find({
       relations: ['role'],
     });

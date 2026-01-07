@@ -2,6 +2,7 @@ export interface Role {
   id: number;
   name: string;
   createdAt?: Date;
+  [key: string]: unknown;
 }
 
 export interface User {
@@ -15,6 +16,7 @@ export interface User {
   createdAt?: Date;
   updatedAt?: Date;
   role?: Role;
+  [key: string]: unknown;
 }
 
 export interface CreateUserRequest {

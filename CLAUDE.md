@@ -231,20 +231,20 @@ pnpm start            # Servidor de desarrollo
 
 ---
 
-### Sprint 5: Gestión de Miembros (Full Stack)
+### Sprint 5: Gestion de Miembros (Full Stack) ✅
 **Backend:**
-- [ ] Agregar filtros en GET /users (búsqueda por nombre, email, estado)
-- [ ] Paginación en listados
-- [ ] RBAC: solo admin puede crear/eliminar usuarios
+- [x] Agregar filtros en GET /users (busqueda por nombre, email, estado)
+- [x] Paginacion en listados
+- [x] RBAC: solo admin puede crear/eliminar usuarios
 
 **Frontend:**
-- [ ] MembersService conectado a /api/users
-- [ ] MembersListComponent con DataTable, búsqueda/filtros
-- [ ] MemberFormComponent (crear/editar con validaciones)
-- [ ] MemberDetailComponent (info, historial aportes, préstamos, multas)
-- [ ] Rutas: /members, /members/new, /members/:id, /members/:id/edit
+- [x] MembersService conectado a /api/users
+- [x] MembersListComponent con DataTable, busqueda/filtros
+- [x] MemberFormComponent (crear/editar con validaciones)
+- [x] MemberDetailComponent (info, historial aportes, prestamos, multas)
+- [x] Rutas: /members, /members/new, /members/:id, /members/:id/edit
 
-**Criterios:** CRUD completo funcionando, validaciones en ambos lados
+**Criterios:** CRUD completo funcionando, validaciones en ambos lados ✅
 
 ---
 

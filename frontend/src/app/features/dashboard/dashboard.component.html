@@ -20,6 +20,17 @@
     <div class="dashboard__loading">
       <app-loading-spinner size="lg" text="Cargando datos..."></app-loading-spinner>
     </div>
+  } @else if (error()) {
+    <!-- Error State -->
+    <div class="dashboard__error">
+      <app-empty-state
+        icon="error"
+        title="Error de conexión"
+        [description]="error()"
+        actionText="Reintentar"
+        (actionClick)="refresh()"
+      ></app-empty-state>
+    </div>
   } @else {
     <!-- Stats Cards -->
     <section class="dashboard__stats">
@@ -51,15 +62,16 @@
                 </div>
                 <div class="activity-item__content">
                   <span class="activity-item__description">{{ activity.description }}</span>
-                  <span class="activity-item__date">{{ activity.date | date:'dd MMM, HH:mm' }}</span>
-                </div>
-                @if (activity.amount) {
-                  <span class="activity-item__amount">
-                    {{ activity.amount | currency:'COP':'symbol-narrow':'1.0-0' }}
+                  <span class="activity-item__meta">
+                    <span class="activity-item__user">{{ activity.userName }}</span>
+                    <span class="activity-item__date">{{ activity.date | date:'dd MMM, HH:mm' }}</span>
                   </span>
-                }
-                <span class="activity-item__status" [class]="getStatusClass(activity.status)">
-                  {{ getStatusLabel(activity.status) }}
+                </div>
+                <span class="activity-item__amount">
+                  {{ formatCurrency(activity.amount) }}
+                </span>
+                <span class="activity-item__type-badge" [class]="getActivityTypeClass(activity.type)">
+                  {{ getActivityTypeLabel(activity.type) }}
                 </span>
               </div>
             }
@@ -76,35 +88,37 @@
         }
       </app-card>
 
-      <!-- Próximos Vencimientos -->
-      <app-card title="Próximos Vencimientos" subtitle="Pagos por vencer" class="dashboard__upcoming">
+      <!-- Pagos Pendientes -->
+      <app-card title="Pagos Pendientes" subtitle="Contribuciones por cobrar" class="dashboard__upcoming">
         @if (upcomingPayments().length > 0) {
           <div class="upcoming-list">
             @for (payment of upcomingPayments(); track payment.id) {
-              <div class="upcoming-item" [class.upcoming-item--urgent]="payment.daysUntilDue <= 3">
+              <div class="upcoming-item">
                 <div class="upcoming-item__info">
-                  <span class="upcoming-item__name">{{ payment.memberName }}</span>
+                  <span class="upcoming-item__name">{{ payment.userName }}</span>
                   <span class="upcoming-item__date">
-                    Vence {{ payment.dueDate | date:'dd MMM' }}
-                    @if (payment.daysUntilDue <= 3) {
-                      <span class="upcoming-item__badge">{{ payment.daysUntilDue }} días</span>
-                    }
+                    Mes: {{ payment.targetMonth }}
                   </span>
                 </div>
-                <span class="upcoming-item__amount">
-                  {{ payment.amount | currency:'COP':'symbol-narrow':'1.0-0' }}
-                </span>
+                <div class="upcoming-item__right">
+                  <span class="upcoming-item__amount">
+                    {{ formatCurrency(payment.amount) }}
+                  </span>
+                  <span class="upcoming-item__status upcoming-item__status--pending">
+                    {{ payment.status }}
+                  </span>
+                </div>
               </div>
             }
           </div>
           <div class="card-footer">
-            <a routerLink="/payments" class="card-footer__link">Ver calendario de pagos</a>
+            <a routerLink="/payments" class="card-footer__link">Ver todos los pagos</a>
           </div>
         } @else {
           <app-empty-state
-            icon="folder"
-            title="Sin vencimientos próximos"
-            description="No hay pagos pendientes"
+            icon="document"
+            title="Sin pagos pendientes"
+            description="Todos los pagos están al día"
           ></app-empty-state>
         }
       </app-card>

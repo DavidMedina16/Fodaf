@@ -36,7 +36,7 @@ export class AuthService {
 
     return this.api.post<LoginResponse>('/auth/login', credentials).pipe(
       tap((response) => {
-        this.storage.setToken(response.access_token);
+        this.storage.setToken(response.accessToken);
         this.storage.setUser(response.user);
         this.currentUserSignal.set(response.user);
         this.isLoadingSignal.set(false);

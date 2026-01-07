@@ -1,38 +1,20 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
-import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { forkJoin } from 'rxjs';
 import {
   StatCardComponent,
   CardComponent,
   LoadingSpinnerComponent,
   EmptyStateComponent
 } from '@shared/components';
-import { AuthService } from '@core/services';
-
-interface DashboardStats {
-  totalSavings: number;
-  totalMembers: number;
-  activeLoans: number;
-  pendingPayments: number;
-  nextPaymentDate: string | null;
-}
-
-interface RecentActivity {
-  id: number;
-  type: 'payment' | 'loan' | 'event' | 'member';
-  description: string;
-  amount?: number;
-  date: Date;
-  status: 'completed' | 'pending' | 'active';
-}
-
-interface UpcomingPayment {
-  id: number;
-  memberName: string;
-  amount: number;
-  dueDate: Date;
-  daysUntilDue: number;
-}
+import {
+  AuthService,
+  DashboardService,
+  DashboardStats,
+  RecentActivity,
+  UpcomingPayment
+} from '@core/services';
 
 interface QuickAction {
   path: string;
@@ -51,7 +33,6 @@ interface QuickAction {
     CardComponent,
     LoadingSpinnerComponent,
     EmptyStateComponent,
-    CurrencyPipe,
     DatePipe
   ],
   templateUrl: './dashboard.component.html',
@@ -59,8 +40,10 @@ interface QuickAction {
 })
 export class DashboardComponent implements OnInit {
   private authService = inject(AuthService);
+  private dashboardService = inject(DashboardService);
 
   loading = signal<boolean>(true);
+  error = signal<string>('');
   stats = signal<DashboardStats | null>(null);
   recentActivity = signal<RecentActivity[]>([]);
   upcomingPayments = signal<UpcomingPayment[]>([]);
@@ -78,13 +61,13 @@ export class DashboardComponent implements OnInit {
         value: this.formatCurrency(data.totalSavings),
         icon: 'money' as const,
         variant: 'success' as const,
-        trend: 'up' as const,
-        trendValue: '+12%',
-        subtitle: 'vs. mes anterior'
+        trend: null,
+        trendValue: '',
+        subtitle: 'Contribuciones pagadas'
       },
       {
         title: 'Miembros Activos',
-        value: data.totalMembers.toString(),
+        value: data.activeMembers.toString(),
         icon: 'users' as const,
         variant: 'primary' as const,
         trend: null,
@@ -107,7 +90,7 @@ export class DashboardComponent implements OnInit {
         variant: 'info' as const,
         trend: null,
         trendValue: '',
-        subtitle: `${data.pendingPayments} pagos pendientes`
+        subtitle: `${data.pendingContributions} pagos pendientes`
       }
     ];
   });
@@ -124,85 +107,25 @@ export class DashboardComponent implements OnInit {
 
   loadDashboardData(): void {
     this.loading.set(true);
+    this.error.set('');
 
-    // Simular carga de datos (será reemplazado con llamadas API reales)
-    setTimeout(() => {
-      this.stats.set({
-        totalSavings: 12450000,
-        totalMembers: 24,
-        activeLoans: 8,
-        pendingPayments: 5,
-        nextPaymentDate: '2024-01-15'
-      });
-
-      this.recentActivity.set([
-        {
-          id: 1,
-          type: 'payment',
-          description: 'Pago mensual - Juan Pérez',
-          amount: 150000,
-          date: new Date(),
-          status: 'completed'
-        },
-        {
-          id: 2,
-          type: 'loan',
-          description: 'Préstamo aprobado - María García',
-          amount: 500000,
-          date: new Date(Date.now() - 86400000),
-          status: 'active'
-        },
-        {
-          id: 3,
-          type: 'payment',
-          description: 'Pago mensual - Carlos López',
-          amount: 150000,
-          date: new Date(Date.now() - 2 * 86400000),
-          status: 'completed'
-        },
-        {
-          id: 4,
-          type: 'member',
-          description: 'Nuevo miembro - Ana Martínez',
-          date: new Date(Date.now() - 3 * 86400000),
-          status: 'completed'
-        },
-        {
-          id: 5,
-          type: 'event',
-          description: 'Evento de recaudación completado',
-          amount: 850000,
-          date: new Date(Date.now() - 5 * 86400000),
-          status: 'completed'
-        }
-      ]);
-
-      this.upcomingPayments.set([
-        {
-          id: 1,
-          memberName: 'Carlos López',
-          amount: 150000,
-          dueDate: new Date(Date.now() + 2 * 86400000),
-          daysUntilDue: 2
-        },
-        {
-          id: 2,
-          memberName: 'Ana Martínez',
-          amount: 150000,
-          dueDate: new Date(Date.now() + 5 * 86400000),
-          daysUntilDue: 5
-        },
-        {
-          id: 3,
-          memberName: 'Pedro Sánchez',
-          amount: 200000,
-          dueDate: new Date(Date.now() + 7 * 86400000),
-          daysUntilDue: 7
-        }
-      ]);
-
-      this.loading.set(false);
-    }, 500);
+    forkJoin({
+      stats: this.dashboardService.getStats(),
+      activity: this.dashboardService.getRecentActivity(5),
+      payments: this.dashboardService.getUpcomingPayments(5)
+    }).subscribe({
+      next: ({ stats, activity, payments }) => {
+        this.stats.set(stats);
+        this.recentActivity.set(activity);
+        this.upcomingPayments.set(payments);
+        this.loading.set(false);
+      },
+      error: (err) => {
+        console.error('Error loading dashboard data:', err);
+        this.error.set('Error al cargar los datos del dashboard. Verifica tu conexión.');
+        this.loading.set(false);
+      }
+    });
   }
 
   refresh(): void {
@@ -228,29 +151,31 @@ export class DashboardComponent implements OnInit {
 
   getActivityIcon(type: string): string {
     const icons: Record<string, string> = {
-      payment: 'M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6',
+      contribution: 'M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6',
       loan: 'M21 12a9 9 0 11-18 0 9 9 0 0118 0zM9 12h6M12 9v6',
-      event: 'M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z',
-      member: 'M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8z'
+      fine: 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z',
+      investment: 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6'
     };
-    return icons[type] || icons['payment'];
+    return icons[type] || icons['contribution'];
   }
 
-  getStatusClass(status: string): string {
-    const classes: Record<string, string> = {
-      completed: 'activity-item__status--completed',
-      pending: 'activity-item__status--pending',
-      active: 'activity-item__status--active'
-    };
-    return classes[status] || '';
-  }
-
-  getStatusLabel(status: string): string {
+  getActivityTypeLabel(type: string): string {
     const labels: Record<string, string> = {
-      completed: 'Completado',
-      pending: 'Pendiente',
-      active: 'Activo'
+      contribution: 'Aporte',
+      loan: 'Préstamo',
+      fine: 'Multa',
+      investment: 'Inversión'
     };
-    return labels[status] || status;
+    return labels[type] || type;
+  }
+
+  getActivityTypeClass(type: string): string {
+    const classes: Record<string, string> = {
+      contribution: 'activity-item__type--contribution',
+      loan: 'activity-item__type--loan',
+      fine: 'activity-item__type--fine',
+      investment: 'activity-item__type--investment'
+    };
+    return classes[type] || '';
   }
 }

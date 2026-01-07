@@ -18,7 +18,7 @@ export class AuthService {
   ) {}
 
   async login(loginDto: LoginDto) {
-    const user = await this.usersService.findByEmail(loginDto.email);
+    const user = await this.usersService.findByEmailWithRole(loginDto.email);
 
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
@@ -51,6 +51,12 @@ export class AuthService {
         firstName: user.firstName,
         lastName: user.lastName,
         roleId: user.roleId,
+        role: user.role
+          ? {
+              id: user.role.id,
+              name: user.role.name,
+            }
+          : null,
       },
     };
   }

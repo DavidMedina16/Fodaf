@@ -173,7 +173,7 @@ pnpm start            # Servidor de desarrollo
 
 ## Progreso de Desarrollo
 
-### Sprint 1: Core Foundation ✅
+### Sprint 1: Frontend Core Foundation ✅
 - [x] Estructura de carpetas escalable
 - [x] Path aliases (@core/*, @shared/*, @features/*, @layouts/*)
 - [x] Modelos TypeScript (User, Auth, ApiResponse, enums)
@@ -182,7 +182,7 @@ pnpm start            # Servidor de desarrollo
 - [x] Guards de rutas (auth, guest, role)
 - [x] Configuración de environments
 
-### Sprint 2: UI Foundation ✅
+### Sprint 2: Frontend UI Foundation ✅
 - [x] Sistema de estilos SCSS (variables, mixins, reset, utilities)
 - [x] Componentes de formulario (Button, Input, Select, FormField)
 - [x] Componentes de feedback (LoadingSpinner, EmptyState, Toast, ConfirmModal)
@@ -192,46 +192,135 @@ pnpm start            # Servidor de desarrollo
 - [x] Rutas base con lazy loading
 - [x] Responsive en móvil y desktop
 
-### Sprint 3: Autenticación y Dashboard
-- [ ] Feature Auth (LoginComponent, validaciones, integración AuthService)
-- [ ] Feature Dashboard (estadísticas, cards resumen, últimos movimientos)
-- [ ] Logout completo (limpiar token, redirigir)
-- **Criterios:** Login funcional, dashboard con info, rutas protegidas
+### Sprint 3: Frontend Auth UI y Dashboard UI ✅
+- [x] Feature Auth (LoginComponent, validaciones, integración AuthService)
+- [x] Feature Dashboard (estadísticas, cards resumen, últimos movimientos)
+- [x] Logout completo (limpiar token, redirigir)
+- **Estado:** UI lista, pendiente integración con backend
 
-### Sprint 4: Gestión de Miembros
-- [ ] MembersService (CRUD completo)
+### Backend Foundation ✅ (Ya implementado)
+- [x] Proyecto NestJS con estructura modular
+- [x] TypeORM + MySQL configurado
+- [x] Auth Module: login JWT, guards, estrategia
+- [x] Users Module: CRUD completo con bcrypt
+- [x] Roles Module: CRUD + seeder (Super Admin, Presidente, Tesoreria, Miembro)
+- [x] Contributions Module: CRUD aportes/pagos
+- [x] Loans Module: CRUD préstamos + cuotas
+- [x] Fines Module: CRUD multas
+- [x] Events Module: CRUD eventos + transacciones
+- [x] Investments Module: CRUD inversiones CDT
+- [x] Config Module: parámetros del sistema
+- [x] Seeder: roles, admin (admin@fodaf.com/admin123), config inicial
+
+---
+
+### Sprint 4: Integración Auth + Dashboard Real
+**Backend:**
+- [ ] GET /api/dashboard/stats (totalAhorrado, miembros, préstamos, próximoPago)
+- [ ] GET /api/dashboard/recent-activity (últimos movimientos)
+- [ ] GET /api/dashboard/upcoming-payments (pagos próximos a vencer)
+- [ ] Ajustar respuesta de /auth/login para incluir role completo
+
+**Frontend:**
+- [ ] Integrar login real con backend (admin@fodaf.com/admin123)
+- [ ] Mostrar datos reales del usuario en header/sidebar
+- [ ] Dashboard conectado a endpoints reales
+- [ ] Manejo de errores de conexión
+
+**Criterios:** Login funcional end-to-end, dashboard con datos reales
+
+---
+
+### Sprint 5: Gestión de Miembros (Full Stack)
+**Backend:**
+- [ ] Agregar filtros en GET /users (búsqueda por nombre, email, estado)
+- [ ] Paginación en listados
+- [ ] RBAC: solo admin puede crear/eliminar usuarios
+
+**Frontend:**
+- [ ] MembersService conectado a /api/users
 - [ ] MembersListComponent con DataTable, búsqueda/filtros
 - [ ] MemberFormComponent (crear/editar con validaciones)
 - [ ] MemberDetailComponent (info, historial aportes, préstamos, multas)
 - [ ] Rutas: /members, /members/new, /members/:id, /members/:id/edit
-- **Criterios:** CRUD completo, validaciones, navegación fluida
 
-### Sprint 5: Gestión de Aportes/Pagos
-- [ ] ContributionsService y modelos
+**Criterios:** CRUD completo funcionando, validaciones en ambos lados
+
+---
+
+### Sprint 6: Gestión de Aportes/Pagos (Full Stack)
+**Backend:**
+- [ ] Filtros en GET /contributions (mes, año, estado, userId)
+- [ ] Endpoint resumen mensual
+- [ ] Lógica automática: pendiente → vencido si pasa fecha límite
+
+**Frontend:**
+- [ ] ContributionsService conectado a /api/contributions
 - [ ] ContributionsListComponent (filtros mes/año/estado, resumen)
-- [ ] ContributionFormComponent (registro de pago, comprobante)
-- [ ] PaymentCalendarComponent (vista mensual, indicadores visuales)
-- **Criterios:** Registrar pagos, ver estado por mes, identificar morosos
+- [ ] ContributionFormComponent (registro de pago)
+- [ ] Vista calendario mensual con indicadores visuales
 
-### Sprint 6: Gestión de Préstamos
-- [ ] LoansService, LoanInstallmentsService y modelos
+**Criterios:** Registrar pagos, ver estado por mes, identificar morosos
+
+---
+
+### Sprint 7: Gestión de Préstamos (Full Stack)
+**Backend:**
+- [ ] Cálculo automático de cuotas con interés
+- [ ] Validar límites de préstamo según historial
+- [ ] Endpoint para aprobar/rechazar préstamos
+- [ ] Tabla de amortización
+
+**Frontend:**
+- [ ] LoansService conectado a /api/loans
 - [ ] LoansListComponent (filtros, resumen)
-- [ ] LoanRequestComponent (calculadora de cuotas, validar límites)
-- [ ] LoanApprovalComponent (aprobar/rechazar solicitudes)
-- [ ] LoanDetailComponent (amortización, registro de cuotas)
-- **Criterios:** Solicitar préstamos, aprobar/rechazar, seguimiento cuotas
+- [ ] LoanRequestComponent (calculadora de cuotas)
+- [ ] LoanApprovalComponent (aprobar/rechazar)
+- [ ] LoanDetailComponent (tabla amortización, pagos)
 
-### Sprint 7: Multas, Eventos e Inversiones
-- [ ] Módulo Multas (CRUD, integrar con detalle miembro)
-- [ ] Módulo Eventos (CRUD con transacciones)
-- [ ] Módulo Inversiones (CRUD con cálculo de rendimientos)
-- **Criterios:** CRUDs funcionando con sus respectivos cálculos
+**Criterios:** Flujo completo de préstamo funcional
 
-### Sprint 8: Configuración y Reportes
-- [ ] SettingsComponent (parámetros, gestión roles)
-- [ ] ReportsService (estado fondo, morosidad, préstamos)
-- [ ] Exportación a Excel y PDF
-- **Criterios:** Configuración editable, reportes visuales, exportación funcional
+---
+
+### Sprint 8: Eventos, Inversiones y Multas (Full Stack)
+**Backend:**
+- [ ] Cálculo de rendimientos CDT automático
+- [ ] Resumen de recaudación por evento
+- [ ] Multas automáticas por mora (opcional)
+
+**Frontend:**
+- [ ] Módulo Eventos (lista, formulario, detalle con transacciones)
+- [ ] Módulo Inversiones (lista, formulario, cálculo rendimientos)
+- [ ] Módulo Multas (lista, asignar multa, integrar en detalle miembro)
+
+**Criterios:** CRUDs funcionando con cálculos automáticos
+
+---
+
+### Sprint 9: Configuración y Reportes
+**Backend:**
+- [ ] Endpoints de reportes (estado fondo, morosidad, préstamos)
+- [ ] Exportación de datos en JSON estructurado
+
+**Frontend:**
+- [ ] SettingsComponent (editar parámetros: tasa interés, cuota, multa)
+- [ ] ReportsComponent (gráficos, tablas resumen)
+- [ ] Exportación a Excel (xlsx)
+- [ ] Exportación a PDF (jspdf)
+
+**Criterios:** Configuración editable, reportes exportables
+
+---
+
+### Sprint 10: Pulido y Producción
+- [ ] RBAC completo (permisos por rol)
+- [ ] Tests unitarios críticos
+- [ ] Swagger/OpenAPI documentación
+- [ ] Docker Compose para desarrollo
+- [ ] Mejoras de UX basadas en feedback
+- [ ] Optimización de queries y performance
+
+**Criterios:** Aplicación estable y lista para producción
 
 ## Notas Adicionales
 

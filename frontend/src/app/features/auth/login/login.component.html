@@ -51,11 +51,11 @@
     </app-form-field>
 
     <div class="login__options">
-      <label class="login__remember">
-        <input type="checkbox" />
+      <label class="login__remember" (click)="toggleRememberMe()">
+        <input type="checkbox" [checked]="rememberMe()" />
         <span>Recordarme</span>
       </label>
-      <a href="#" class="login__forgot">¿Olvidaste tu contraseña?</a>
+      <a href="javascript:void(0)" class="login__forgot">¿Olvidaste tu contraseña?</a>
     </div>
 
     <app-button

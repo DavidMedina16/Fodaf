@@ -1,33 +1,148 @@
 <div class="dashboard">
+  <!-- Header -->
   <header class="dashboard__header">
-    <h1 class="dashboard__title">Dashboard</h1>
-    <p class="dashboard__subtitle">Bienvenido al Fondo de Ahorro Familiar</p>
+    <div class="dashboard__welcome">
+      <h1 class="dashboard__title">Bienvenido, {{ userFirstName() }}</h1>
+      <p class="dashboard__subtitle">Resumen del Fondo de Ahorro Familiar</p>
+    </div>
+    <button class="dashboard__refresh" (click)="refresh()" [disabled]="loading()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M23 4v6h-6"/>
+        <path d="M1 20v-6h6"/>
+        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+      </svg>
+      <span>Actualizar</span>
+    </button>
   </header>
 
-  <section class="dashboard__stats">
-    @for (stat of stats; track stat.title) {
-      <app-stat-card
-        [title]="stat.title"
-        [value]="stat.value"
-        [icon]="stat.icon"
-        [variant]="stat.variant"
-        [trend]="stat.trend || null"
-        [trendValue]="stat.trendValue || ''"
-      ></app-stat-card>
-    }
-  </section>
+  @if (loading()) {
+    <!-- Loading State -->
+    <div class="dashboard__loading">
+      <app-loading-spinner size="lg" text="Cargando datos..."></app-loading-spinner>
+    </div>
+  } @else {
+    <!-- Stats Cards -->
+    <section class="dashboard__stats">
+      @for (stat of statCards(); track stat.title) {
+        <app-stat-card
+          [title]="stat.title"
+          [value]="stat.value"
+          [icon]="stat.icon"
+          [variant]="stat.variant"
+          [trend]="stat.trend"
+          [trendValue]="stat.trendValue"
+          [subtitle]="stat.subtitle"
+        ></app-stat-card>
+      }
+    </section>
 
-  <section class="dashboard__content">
-    <app-card title="Actividad Reciente" class="dashboard__activity">
-      <p class="dashboard__placeholder">
-        Aquí se mostrarán los últimos movimientos del fondo.
-      </p>
-    </app-card>
+    <!-- Content Grid -->
+    <section class="dashboard__content">
+      <!-- Actividad Reciente -->
+      <app-card title="Actividad Reciente" subtitle="Últimos movimientos" class="dashboard__activity">
+        @if (recentActivity().length > 0) {
+          <div class="activity-list">
+            @for (activity of recentActivity(); track activity.id) {
+              <div class="activity-item">
+                <div class="activity-item__icon activity-item__icon--{{ activity.type }}">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path [attr.d]="getActivityIcon(activity.type)"/>
+                  </svg>
+                </div>
+                <div class="activity-item__content">
+                  <span class="activity-item__description">{{ activity.description }}</span>
+                  <span class="activity-item__date">{{ activity.date | date:'dd MMM, HH:mm' }}</span>
+                </div>
+                @if (activity.amount) {
+                  <span class="activity-item__amount">
+                    {{ activity.amount | currency:'COP':'symbol-narrow':'1.0-0' }}
+                  </span>
+                }
+                <span class="activity-item__status" [class]="getStatusClass(activity.status)">
+                  {{ getStatusLabel(activity.status) }}
+                </span>
+              </div>
+            }
+          </div>
+          <div class="card-footer">
+            <a routerLink="/payments" class="card-footer__link">Ver todos los movimientos</a>
+          </div>
+        } @else {
+          <app-empty-state
+            icon="folder"
+            title="Sin actividad reciente"
+            description="Los movimientos aparecerán aquí"
+          ></app-empty-state>
+        }
+      </app-card>
 
-    <app-card title="Próximos Vencimientos" class="dashboard__upcoming">
-      <p class="dashboard__placeholder">
-        Aquí se mostrarán los pagos y préstamos próximos a vencer.
-      </p>
-    </app-card>
-  </section>
+      <!-- Próximos Vencimientos -->
+      <app-card title="Próximos Vencimientos" subtitle="Pagos por vencer" class="dashboard__upcoming">
+        @if (upcomingPayments().length > 0) {
+          <div class="upcoming-list">
+            @for (payment of upcomingPayments(); track payment.id) {
+              <div class="upcoming-item" [class.upcoming-item--urgent]="payment.daysUntilDue <= 3">
+                <div class="upcoming-item__info">
+                  <span class="upcoming-item__name">{{ payment.memberName }}</span>
+                  <span class="upcoming-item__date">
+                    Vence {{ payment.dueDate | date:'dd MMM' }}
+                    @if (payment.daysUntilDue <= 3) {
+                      <span class="upcoming-item__badge">{{ payment.daysUntilDue }} días</span>
+                    }
+                  </span>
+                </div>
+                <span class="upcoming-item__amount">
+                  {{ payment.amount | currency:'COP':'symbol-narrow':'1.0-0' }}
+                </span>
+              </div>
+            }
+          </div>
+          <div class="card-footer">
+            <a routerLink="/payments" class="card-footer__link">Ver calendario de pagos</a>
+          </div>
+        } @else {
+          <app-empty-state
+            icon="folder"
+            title="Sin vencimientos próximos"
+            description="No hay pagos pendientes"
+          ></app-empty-state>
+        }
+      </app-card>
+    </section>
+
+    <!-- Acciones Rápidas -->
+    <section class="dashboard__actions">
+      <h2 class="dashboard__section-title">Acciones Rápidas</h2>
+      <div class="quick-actions">
+        @for (action of quickActions; track action.path) {
+          <a [routerLink]="action.path" class="quick-action">
+            <div class="quick-action__icon quick-action__icon--{{ action.variant }}">
+              @switch (action.icon) {
+                @case ('payment') {
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                  </svg>
+                }
+                @case ('loan') {
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+                    <line x1="1" y1="10" x2="23" y2="10"/>
+                  </svg>
+                }
+                @case ('member') {
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                  </svg>
+                }
+              }
+            </div>
+            <span class="quick-action__label">{{ action.label }}</span>
+          </a>
+        }
+      </div>
+    </section>
+  }
 </div>

@@ -153,6 +153,17 @@
     margin-top: 2px;
   }
 
+  &__dropdown-role {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: $font-weight-medium;
+    color: $primary;
+    background-color: rgba($primary, 0.1);
+    padding: 2px $spacing-2;
+    border-radius: $border-radius-full;
+    margin-top: $spacing-2;
+  }
+
   &__dropdown-divider {
     height: 1px;
     background-color: $border-color-light;

@@ -10,6 +10,7 @@ import { FinesModule } from './modules/fines/fines.module';
 import { EventsModule } from './modules/events/events.module';
 import { InvestmentsModule } from './modules/investments/investments.module';
 import { AppConfigModule } from './modules/config/config.module';
+import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { SeederModule } from './database/seeders/seeder.module';
 
 @Module({
@@ -27,8 +28,9 @@ import { SeederModule } from './database/seeders/seeder.module';
         username: configService.get('DB_USERNAME', 'root'),
         password: configService.get('DB_PASSWORD', 'password'),
         database: configService.get('DB_DATABASE', 'fodaf'),
+        socketPath: configService.get('DB_SOCKET', '/tmp/mysql.sock'),
         entities: [__dirname + '/entities/*.entity{.ts,.js}'],
-        synchronize: false, // Desactivado - usar migraciones
+        synchronize: true, // TODO: Desactivar en producción y usar migraciones
         logging: configService.get('NODE_ENV') !== 'production',
       }),
     }),
@@ -41,6 +43,7 @@ import { SeederModule } from './database/seeders/seeder.module';
     EventsModule,
     InvestmentsModule,
     AppConfigModule,
+    DashboardModule,
     SeederModule,
   ],
 })

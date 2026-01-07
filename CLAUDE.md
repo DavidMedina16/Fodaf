@@ -214,20 +214,20 @@ pnpm start            # Servidor de desarrollo
 
 ---
 
-### Sprint 4: Integración Auth + Dashboard Real
+### Sprint 4: Integración Auth + Dashboard Real ✅
 **Backend:**
-- [ ] GET /api/dashboard/stats (totalAhorrado, miembros, préstamos, próximoPago)
-- [ ] GET /api/dashboard/recent-activity (últimos movimientos)
-- [ ] GET /api/dashboard/upcoming-payments (pagos próximos a vencer)
-- [ ] Ajustar respuesta de /auth/login para incluir role completo
+- [x] GET /api/dashboard/stats (totalAhorrado, miembros, préstamos, próximoPago)
+- [x] GET /api/dashboard/recent-activity (últimos movimientos)
+- [x] GET /api/dashboard/upcoming-payments (pagos próximos a vencer)
+- [x] Ajustar respuesta de /auth/login para incluir role completo
 
 **Frontend:**
-- [ ] Integrar login real con backend (admin@fodaf.com/admin123)
-- [ ] Mostrar datos reales del usuario en header/sidebar
-- [ ] Dashboard conectado a endpoints reales
-- [ ] Manejo de errores de conexión
+- [x] Integrar login real con backend (admin@fodaf.com/admin123)
+- [x] Mostrar datos reales del usuario en header/sidebar
+- [x] Dashboard conectado a endpoints reales
+- [x] Manejo de errores de conexión
 
-**Criterios:** Login funcional end-to-end, dashboard con datos reales
+**Criterios:** Login funcional end-to-end, dashboard con datos reales ✅
 
 ---
 

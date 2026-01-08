@@ -248,19 +248,21 @@ pnpm start            # Servidor de desarrollo
 
 ---
 
-### Sprint 6: Gestión de Aportes/Pagos (Full Stack)
+### Sprint 6: Gestión de Aportes/Pagos (Full Stack) ✅
 **Backend:**
-- [ ] Filtros en GET /contributions (mes, año, estado, userId)
-- [ ] Endpoint resumen mensual
-- [ ] Lógica automática: pendiente → vencido si pasa fecha límite
+- [x] Filtros en GET /contributions (mes, año, estado, userId)
+- [x] Endpoint resumen mensual y anual
+- [x] Lógica automática: pendiente → vencido si pasa fecha límite
+- [x] Endpoint para estado de aportes por usuario/año
 
 **Frontend:**
-- [ ] ContributionsService conectado a /api/contributions
-- [ ] ContributionsListComponent (filtros mes/año/estado, resumen)
-- [ ] ContributionFormComponent (registro de pago)
-- [ ] Vista calendario mensual con indicadores visuales
+- [x] ContributionsService conectado a /api/contributions
+- [x] PaymentsListComponent (filtros mes/año/estado, resumen con StatCards)
+- [x] PaymentFormComponent (crear/editar aportes con validaciones)
+- [x] PaymentsCalendarComponent (vista anual por miembro con indicadores)
+- [x] Rutas: /payments, /payments/new, /payments/:id/edit, /payments/calendar
 
-**Criterios:** Registrar pagos, ver estado por mes, identificar morosos
+**Criterios:** Registrar pagos, ver estado por mes, identificar morosos ✅
 
 ---
 

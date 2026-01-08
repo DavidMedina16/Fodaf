@@ -32,6 +32,18 @@ export class Loan {
   @Column({ name: 'interest_rate', type: 'decimal', precision: 5, scale: 2 })
   interestRate: number;
 
+  @Column({ name: 'term_months', type: 'int' })
+  termMonths: number;
+
+  @Column({ name: 'monthly_payment', type: 'decimal', precision: 15, scale: 2, nullable: true })
+  monthlyPayment: number;
+
+  @Column({ name: 'total_amount', type: 'decimal', precision: 15, scale: 2, nullable: true })
+  totalAmount: number;
+
+  @Column({ name: 'total_interest', type: 'decimal', precision: 15, scale: 2, nullable: true })
+  totalInterest: number;
+
   @Column({ name: 'start_date', type: 'date', nullable: true })
   startDate: Date;
 

@@ -18,6 +18,12 @@ export enum LoanStatus {
   REJECTED = 'Rechazado',
 }
 
+export enum InstallmentStatus {
+  PENDING = 'Pendiente',
+  PAID = 'Pagado',
+  OVERDUE = 'Vencido',
+}
+
 // Fine enums
 export enum FineStatus {
   PENDING = 'Pendiente',

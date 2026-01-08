@@ -266,21 +266,24 @@ pnpm start            # Servidor de desarrollo
 
 ---
 
-### Sprint 7: Gestión de Préstamos (Full Stack)
+### Sprint 7: Gestión de Préstamos (Full Stack) ✅
 **Backend:**
-- [ ] Cálculo automático de cuotas con interés
-- [ ] Validar límites de préstamo según historial
-- [ ] Endpoint para aprobar/rechazar préstamos
-- [ ] Tabla de amortización
+- [x] Cálculo automático de cuotas con interés (sistema francés)
+- [x] Validar límites de préstamo según historial (3x aportes)
+- [x] Endpoint para aprobar/rechazar préstamos (POST /loans/:id/approve, /reject)
+- [x] Tabla de amortización (GET /loans/:id/amortization)
+- [x] Filtros y paginación en GET /loans
+- [x] Endpoint de simulación (GET /loans/simulate)
+- [x] Endpoint de límite de crédito (GET /loans/user/:userId/credit-limit)
 
 **Frontend:**
-- [ ] LoansService conectado a /api/loans
-- [ ] LoansListComponent (filtros, resumen)
-- [ ] LoanRequestComponent (calculadora de cuotas)
-- [ ] LoanApprovalComponent (aprobar/rechazar)
-- [ ] LoanDetailComponent (tabla amortización, pagos)
+- [x] LoansService conectado a /api/loans
+- [x] LoansListComponent (filtros por estado, resumen con StatCards, paginación)
+- [x] LoanRequestComponent (calculadora de cuotas en tiempo real, validación de crédito)
+- [x] LoanDetailComponent (tabla amortización, aprobar/rechazar, historial de cuotas)
+- [x] Rutas: /loans, /loans/new, /loans/:id
 
-**Criterios:** Flujo completo de préstamo funcional
+**Criterios:** Flujo completo de préstamo funcional ✅
 
 ---
 

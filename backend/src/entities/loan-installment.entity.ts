@@ -9,6 +9,12 @@ import {
 import { Loan } from './loan.entity';
 import { User } from './user.entity';
 
+export enum InstallmentStatus {
+  PENDING = 'Pendiente',
+  PAID = 'Pagado',
+  OVERDUE = 'Vencido',
+}
+
 @Entity('loan_installments')
 export class LoanInstallment {
   @PrimaryGeneratedColumn()
@@ -17,12 +23,14 @@ export class LoanInstallment {
   @Column({ name: 'loan_id' })
   loanId: number;
 
+  @Column({ name: 'installment_number', type: 'int' })
+  installmentNumber: number;
+
   @Column({
     name: 'amount_capital',
     type: 'decimal',
     precision: 15,
     scale: 2,
-    nullable: true,
   })
   amountCapital: number;
 
@@ -31,12 +39,38 @@ export class LoanInstallment {
     type: 'decimal',
     precision: 15,
     scale: 2,
-    nullable: true,
   })
   amountInterest: number;
 
+  @Column({
+    name: 'total_amount',
+    type: 'decimal',
+    precision: 15,
+    scale: 2,
+  })
+  totalAmount: number;
+
+  @Column({
+    name: 'remaining_balance',
+    type: 'decimal',
+    precision: 15,
+    scale: 2,
+  })
+  remainingBalance: number;
+
+  @Column({ name: 'due_date', type: 'date' })
+  dueDate: Date;
+
   @Column({ name: 'payment_date', type: 'date', nullable: true })
   paymentDate: Date;
+
+  @Column({
+    name: 'status',
+    type: 'varchar',
+    length: 50,
+    default: InstallmentStatus.PENDING,
+  })
+  status: string;
 
   @Column({ name: 'created_by', nullable: true })
   createdBy: number;

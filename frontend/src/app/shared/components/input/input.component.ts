@@ -2,7 +2,7 @@ import { Component, input, output, forwardRef, signal, effect } from '@angular/c
 import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
 
-export type InputType = 'text' | 'email' | 'password' | 'number' | 'tel' | 'search';
+export type InputType = 'text' | 'email' | 'password' | 'number' | 'tel' | 'search' | 'date' | 'month';
 
 @Component({
   selector: 'app-input',

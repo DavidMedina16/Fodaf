@@ -9,9 +9,14 @@ import {
   ParseIntPipe,
   UseGuards,
   Request,
+  Query,
 } from '@nestjs/common';
 import { ContributionsService } from './contributions.service';
-import { CreateContributionDto, UpdateContributionDto } from './dto';
+import {
+  CreateContributionDto,
+  UpdateContributionDto,
+  FilterContributionsDto,
+} from './dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @UseGuards(JwtAuthGuard)
@@ -28,8 +33,31 @@ export class ContributionsController {
   }
 
   @Get()
-  findAll() {
-    return this.contributionsService.findAll();
+  findAll(@Query() filters: FilterContributionsDto) {
+    return this.contributionsService.findAll(filters);
+  }
+
+  @Get('summary/monthly/:targetMonth')
+  getMonthlySummary(@Param('targetMonth') targetMonth: string) {
+    return this.contributionsService.getMonthlySummary(targetMonth);
+  }
+
+  @Get('summary/yearly/:year')
+  getYearlySummary(@Param('year', ParseIntPipe) year: number) {
+    return this.contributionsService.getYearlySummary(year);
+  }
+
+  @Get('user/:userId/status/:year')
+  getUserYearStatus(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Param('year', ParseIntPipe) year: number,
+  ) {
+    return this.contributionsService.getUserContributionStatus(userId, year);
+  }
+
+  @Post('mark-overdue')
+  markOverdue() {
+    return this.contributionsService.markOverdueContributions();
   }
 
   @Get('user/:userId')

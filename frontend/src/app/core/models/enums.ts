@@ -7,6 +7,7 @@ export enum ContributionType {
 export enum ContributionStatus {
   PAID = 'Pagado',
   PENDING = 'Pendiente',
+  OVERDUE = 'Vencido',
 }
 
 // Loan enums

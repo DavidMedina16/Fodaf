@@ -47,6 +47,10 @@ export const routes: Routes = [
         loadChildren: () => import('./features/investments/investments.routes').then(m => m.INVESTMENTS_ROUTES)
       },
       {
+        path: 'fines',
+        loadChildren: () => import('./features/fines/fines.routes').then(m => m.FINES_ROUTES)
+      },
+      {
         path: '',
         redirectTo: 'dashboard',
         pathMatch: 'full'

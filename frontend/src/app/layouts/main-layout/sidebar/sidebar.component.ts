@@ -30,6 +30,7 @@ export class SidebarComponent {
     { path: '/loans', label: 'Préstamos', icon: 'loans' },
     { path: '/events', label: 'Eventos', icon: 'events' },
     { path: '/investments', label: 'Inversiones', icon: 'investments' },
+    { path: '/fines', label: 'Multas', icon: 'fines' },
   ];
 
   onOverlayClick(): void {

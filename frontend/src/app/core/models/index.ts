@@ -5,3 +5,6 @@ export * from './api-response.model';
 export * from './enums';
 export * from './contribution.model';
 export * from './loan.model';
+export * from './investment.model';
+export * from './event.model';
+export * from './fine.model';

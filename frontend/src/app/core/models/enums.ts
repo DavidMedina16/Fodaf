@@ -34,6 +34,7 @@ export enum FineStatus {
 export enum InvestmentStatus {
   ACTIVE = 'Activa',
   FINISHED = 'Finalizada',
+  RENEWED = 'Renovada',
 }
 
 // Event transaction enums

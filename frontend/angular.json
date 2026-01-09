@@ -37,7 +37,17 @@
             ],
             "stylePreprocessorOptions": {
               "includePaths": ["src"]
-            }
+            },
+            "allowedCommonJsDependencies": [
+              "xlsx",
+              "jspdf",
+              "jspdf-autotable",
+              "html2canvas",
+              "canvg",
+              "raf",
+              "rgbcolor",
+              "core-js"
+            ]
           },
           "configurations": {
             "production": {

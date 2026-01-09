@@ -31,6 +31,8 @@ export class SidebarComponent {
     { path: '/events', label: 'Eventos', icon: 'events' },
     { path: '/investments', label: 'Inversiones', icon: 'investments' },
     { path: '/fines', label: 'Multas', icon: 'fines' },
+    { path: '/reports', label: 'Reportes', icon: 'reports' },
+    { path: '/settings', label: 'Configuración', icon: 'settings' },
   ];
 
   onOverlayClick(): void {

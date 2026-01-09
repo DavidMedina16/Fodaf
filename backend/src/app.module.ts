@@ -11,6 +11,7 @@ import { EventsModule } from './modules/events/events.module';
 import { InvestmentsModule } from './modules/investments/investments.module';
 import { AppConfigModule } from './modules/config/config.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
+import { ReportsModule } from './modules/reports/reports.module';
 import { SeederModule } from './database/seeders/seeder.module';
 
 @Module({
@@ -44,6 +45,7 @@ import { SeederModule } from './database/seeders/seeder.module';
     InvestmentsModule,
     AppConfigModule,
     DashboardModule,
+    ReportsModule,
     SeederModule,
   ],
 })

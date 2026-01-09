@@ -341,18 +341,34 @@ pnpm start            # Servidor de desarrollo
 
 ---
 
-### Sprint 9: Configuración y Reportes
+### Sprint 9: Configuración y Reportes ✅
 **Backend:**
-- [ ] Endpoints de reportes (estado fondo, morosidad, préstamos)
-- [ ] Exportación de datos en JSON estructurado
+- [x] Mejorar Config Module (tipo, categoría, descripción por configuración)
+- [x] GET /config/system - Configuraciones como objeto agrupado
+- [x] GET /config/system/by-category - Configuraciones por categoría
+- [x] PATCH /config/system - Actualización masiva de configuraciones
+- [x] PATCH /config/key/:key - Actualización por clave
+- [x] Seeder mejorado con configuraciones categorizadas
+- [x] Reports Module completo:
+  - GET /reports/fund-status (estado general del fondo)
+  - GET /reports/delinquency (reporte de morosidad)
+  - GET /reports/loans (reporte de préstamos)
+  - GET /reports/contributions (aportes por año)
+  - GET /reports/export (exportación JSON estructurado)
 
 **Frontend:**
-- [ ] SettingsComponent (editar parámetros: tasa interés, cuota, multa)
-- [ ] ReportsComponent (gráficos, tablas resumen)
-- [ ] Exportación a Excel (xlsx)
-- [ ] Exportación a PDF (jspdf)
+- [x] Modelos TypeScript (config.model.ts, report.model.ts)
+- [x] ConfigService conectado a /api/config
+- [x] ReportsService conectado a /api/reports
+- [x] SettingsComponent (formulario por categorías, edición masiva)
+- [x] ReportsComponent con tabs (estado fondo, morosidad, préstamos, aportes)
+- [x] Visualización de datos con gráficos de barras y estadísticas
+- [x] Exportación a Excel (xlsx) con múltiples hojas
+- [x] Exportación a PDF (jspdf + jspdf-autotable)
+- [x] Navegación en sidebar (Reportes, Configuración)
+- [x] Rutas: /settings, /reports
 
-**Criterios:** Configuración editable, reportes exportables
+**Criterios:** Configuración editable, reportes exportables ✅
 
 ---
 

@@ -287,18 +287,57 @@ pnpm start            # Servidor de desarrollo
 
 ---
 
-### Sprint 8: Eventos, Inversiones y Multas (Full Stack)
+### Sprint 8: Eventos, Inversiones y Multas (Full Stack) ✅
+
+#### Módulo Inversiones CDT ✅
 **Backend:**
-- [ ] Cálculo de rendimientos CDT automático
-- [ ] Resumen de recaudación por evento
-- [ ] Multas automáticas por mora (opcional)
+- [x] Cálculo automático de rendimientos CDT (interés simple: I = P × r × d/365)
+- [x] Entidad Investment mejorada (interestRate, termDays, totalAtMaturity)
+- [x] InvestmentCalculationService con simulación y cálculos
+- [x] Filtros y paginación en GET /investments
+- [x] Endpoint de resumen (GET /investments/summary)
+- [x] Endpoint de simulación (GET /investments/simulate)
+- [x] Endpoints de acciones: POST /investments/:id/finish, /renew
 
 **Frontend:**
-- [ ] Módulo Eventos (lista, formulario, detalle con transacciones)
-- [ ] Módulo Inversiones (lista, formulario, cálculo rendimientos)
-- [ ] Módulo Multas (lista, asignar multa, integrar en detalle miembro)
+- [x] Modelo Investment y InvestmentsService
+- [x] InvestmentsListComponent (filtros, StatCards, paginación, alertas vencimiento)
+- [x] InvestmentFormComponent (calculadora en tiempo real)
+- [x] InvestmentDetailComponent (progreso, rendimientos, acciones)
+- [x] Rutas: /investments, /investments/new, /investments/:id, /investments/:id/edit
 
-**Criterios:** CRUDs funcionando con cálculos automáticos
+#### Módulo Eventos ✅
+**Backend:**
+- [x] Resumen de recaudación por evento (GET /events/:id/summary)
+- [x] Filtros y paginación en GET /events (status, search, dateFrom, dateTo)
+- [x] Endpoint de resumen global (GET /events/summary)
+- [x] Endpoint cambiar estado (PATCH /events/:id/status)
+- [x] CRUD de transacciones por evento
+
+**Frontend:**
+- [x] Modelos Event, EventTransaction, EventSummary
+- [x] EventsService conectado a /api/events
+- [x] EventsListComponent (filtros, StatCards, paginación, próximos eventos)
+- [x] EventFormComponent (crear/editar eventos)
+- [x] EventDetailComponent (resumen, progreso meta, transacciones con CRUD)
+- [x] Rutas: /events, /events/new, /events/:id, /events/:id/edit
+
+#### Módulo Multas ✅
+**Backend:**
+- [x] Filtros y paginación en GET /fines (status, category, userId, search)
+- [x] Endpoint de resumen (GET /fines/summary)
+- [x] Endpoint marcar como pagada (PATCH /fines/:id/pay)
+- [x] Resumen de multas por usuario (GET /fines/user/:userId/summary)
+
+**Frontend:**
+- [x] Modelos Fine, FineCategory, FinesSummary
+- [x] FinesService conectado a /api/fines
+- [x] FinesListComponent (filtros, StatCards por categoría, paginación)
+- [x] FineFormComponent (asignar multa a miembro con selección)
+- [x] Navegación agregada en sidebar
+- [x] Rutas: /fines, /fines/new, /fines/:id/edit
+
+**Criterios:** CRUDs funcionando con cálculos automáticos ✅
 
 ---
 

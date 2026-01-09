@@ -9,8 +9,9 @@ import {
   ParseIntPipe,
   UseGuards,
   Request,
+  Query,
 } from '@nestjs/common';
-import { FinesService } from './fines.service';
+import { FinesService, FinesFilterDto } from './fines.service';
 import { CreateFineDto, UpdateFineDto } from './dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
@@ -28,13 +29,23 @@ export class FinesController {
   }
 
   @Get()
-  findAll() {
-    return this.finesService.findAll();
+  findAll(@Query() filters: FinesFilterDto) {
+    return this.finesService.findAll(filters);
+  }
+
+  @Get('summary')
+  getSummary() {
+    return this.finesService.getSummary();
   }
 
   @Get('user/:userId')
   findByUser(@Param('userId', ParseIntPipe) userId: number) {
     return this.finesService.findByUser(userId);
+  }
+
+  @Get('user/:userId/summary')
+  getUserFinesSummary(@Param('userId', ParseIntPipe) userId: number) {
+    return this.finesService.getUserFinesSummary(userId);
   }
 
   @Get(':id')
@@ -48,6 +59,11 @@ export class FinesController {
     @Body() updateFineDto: UpdateFineDto,
   ) {
     return this.finesService.update(id, updateFineDto);
+  }
+
+  @Patch(':id/pay')
+  markAsPaid(@Param('id', ParseIntPipe) id: number) {
+    return this.finesService.markAsPaid(id);
   }
 
   @Delete(':id')

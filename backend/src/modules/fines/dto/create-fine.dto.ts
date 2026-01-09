@@ -1,19 +1,32 @@
-import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  IsEnum,
+  Min,
+} from 'class-validator';
+import { FineStatus, FineCategory } from '../../../entities/fine.entity';
 
 export class CreateFineDto {
   @IsNumber()
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'El usuario es requerido' })
   userId: number;
 
-  @IsNumber()
-  @IsOptional()
-  amount?: number;
+  @IsNumber({}, { message: 'El monto debe ser un número' })
+  @IsNotEmpty({ message: 'El monto es requerido' })
+  @Min(1, { message: 'El monto debe ser mayor a 0' })
+  amount: number;
 
   @IsString()
   @IsOptional()
   reason?: string;
 
-  @IsString()
+  @IsEnum(FineCategory, { message: 'La categoría debe ser válida' })
   @IsOptional()
-  status?: string;
+  category?: FineCategory;
+
+  @IsEnum(FineStatus, { message: 'El estado debe ser válido' })
+  @IsOptional()
+  status?: FineStatus;
 }

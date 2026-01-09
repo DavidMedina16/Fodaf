@@ -13,11 +13,11 @@ import {
   ConfirmModalComponent,
 } from '@shared/components';
 import { ToastService } from '@shared/services/toast.service';
-import { EventsService } from '../services/events.service';
-import { Event, EventStatus, EventsSummary, PaginatedEvents } from '@core/models/event.model';
+import { FinesService } from '../services/fines.service';
+import { Fine, FineStatus, FineCategory, FinesSummary, PaginatedFines } from '@core/models/fine.model';
 
 @Component({
-  selector: 'app-events-list',
+  selector: 'app-fines-list',
   standalone: true,
   imports: [
     CommonModule,
@@ -37,10 +37,10 @@ import { Event, EventStatus, EventsSummary, PaginatedEvents } from '@core/models
     <div class="page">
       <header class="page__header">
         <div class="page__header-content">
-          <h1 class="page__title">Eventos</h1>
-          <p class="page__subtitle">Organización y recaudación de eventos del fondo</p>
+          <h1 class="page__title">Multas</h1>
+          <p class="page__subtitle">Gestión de multas y penalizaciones del fondo</p>
         </div>
-        <app-button (click)="goToNewEvent()">Nuevo Evento</app-button>
+        <app-button (click)="goToNewFine()">Nueva Multa</app-button>
       </header>
 
       @if (loading()) {
@@ -49,32 +49,48 @@ import { Event, EventStatus, EventsSummary, PaginatedEvents } from '@core/models
         <!-- Summary Cards -->
         <div class="stats-grid">
           <app-stat-card
-            title="Total Eventos"
-            [value]="String(summary()?.totalEvents || 0)"
-            icon="calendar"
-          ></app-stat-card>
-          <app-stat-card
-            title="Eventos Activos"
-            [value]="String(summary()?.activeEvents || 0)"
+            title="Total Multas"
+            [value]="String(summary()?.totalFines || 0)"
             icon="chart"
           ></app-stat-card>
           <app-stat-card
-            title="Total Recaudado"
-            [value]="formatCurrency(summary()?.totalRaised || 0)"
+            title="Pendientes"
+            [value]="String(summary()?.pendingFines || 0)"
+            icon="calendar"
+          ></app-stat-card>
+          <app-stat-card
+            title="Monto Pendiente"
+            [value]="formatCurrency(summary()?.totalPendingAmount || 0)"
             icon="money"
           ></app-stat-card>
           <app-stat-card
-            title="Meta Total"
-            [value]="formatCurrency(summary()?.totalGoal || 0)"
+            title="Monto Recaudado"
+            [value]="formatCurrency(summary()?.totalPaidAmount || 0)"
             icon="wallet"
           ></app-stat-card>
         </div>
+
+        <!-- Category Summary -->
+        @if (summary()?.byCategory?.length) {
+          <app-card>
+            <h3 class="section-title">Por Categoría</h3>
+            <div class="category-grid">
+              @for (cat of summary()?.byCategory; track cat.category) {
+                <div class="category-item">
+                  <span class="category-item__name">{{ cat.category }}</span>
+                  <span class="category-item__count">{{ cat.count }} multas</span>
+                  <span class="category-item__amount">{{ cat.amount | currency:'COP':'symbol':'1.0-0' }}</span>
+                </div>
+              }
+            </div>
+          </app-card>
+        }
 
         <!-- Filters -->
         <app-card>
           <div class="filters">
             <app-input
-              placeholder="Buscar eventos..."
+              placeholder="Buscar por razón o miembro..."
               [value]="searchTerm()"
               (inputChange)="searchTerm.set($event)"
               (keyup.enter)="applyFilters()"
@@ -85,51 +101,61 @@ import { Event, EventStatus, EventsSummary, PaginatedEvents } from '@core/models
               (selectionChange)="onStatusChange($event)"
               placeholder="Todos los estados"
             ></app-select>
+            <app-select
+              [options]="categoryOptions"
+              [value]="selectedCategory()"
+              (selectionChange)="onCategoryChange($event)"
+              placeholder="Todas las categorías"
+            ></app-select>
             <app-button variant="secondary" (click)="applyFilters()">Filtrar</app-button>
             <app-button variant="outline" (click)="clearFilters()">Limpiar</app-button>
           </div>
         </app-card>
 
-        <!-- Events Table -->
+        <!-- Fines Table -->
         <app-card>
-          @if (events().length === 0) {
+          @if (fines().length === 0) {
             <app-empty-state
               icon="folder"
-              title="No hay eventos"
-              description="Crea tu primer evento para comenzar a registrar actividades."
-              actionText="Crear Evento"
-              (actionClick)="goToNewEvent()"
+              title="No hay multas"
+              description="No se han registrado multas aún."
+              actionText="Crear Multa"
+              (actionClick)="goToNewFine()"
             ></app-empty-state>
           } @else {
             <div class="table-container">
               <table class="table">
                 <thead>
                   <tr>
-                    <th>Nombre</th>
-                    <th>Fecha</th>
-                    <th>Ubicación</th>
-                    <th>Meta</th>
+                    <th>Miembro</th>
+                    <th>Monto</th>
+                    <th>Categoría</th>
+                    <th>Razón</th>
                     <th>Estado</th>
+                    <th>Fecha</th>
                     <th>Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
-                  @for (event of events(); track event.id) {
-                    <tr (click)="goToDetail(event.id)" class="clickable">
-                      <td>{{ event.name }}</td>
-                      <td>{{ event.eventDate | date:'dd/MM/yyyy' }}</td>
-                      <td>{{ event.location || '-' }}</td>
-                      <td>{{ event.fundraisingGoal | currency:'COP':'symbol':'1.0-0' }}</td>
+                  @for (fine of fines(); track fine.id) {
+                    <tr>
+                      <td>{{ fine.user?.firstName }} {{ fine.user?.lastName }}</td>
+                      <td>{{ fine.amount | currency:'COP':'symbol':'1.0-0' }}</td>
+                      <td><span class="badge badge--category">{{ fine.category }}</span></td>
+                      <td>{{ fine.reason || '-' }}</td>
                       <td>
-                        <span class="badge" [class]="'badge--' + getStatusClass(event.status)">
-                          {{ event.status }}
+                        <span class="badge" [class]="'badge--' + getStatusClass(fine.status)">
+                          {{ fine.status }}
                         </span>
                       </td>
+                      <td>{{ fine.createdAt | date:'dd/MM/yyyy' }}</td>
                       <td>
-                        <div class="actions" (click)="$event.stopPropagation()">
-                          <app-button variant="ghost" size="sm" (click)="goToDetail(event.id)">Ver</app-button>
-                          <app-button variant="ghost" size="sm" (click)="goToEdit(event.id)">Editar</app-button>
-                          <app-button variant="ghost" size="sm" (click)="confirmDelete(event)">Eliminar</app-button>
+                        <div class="actions">
+                          @if (fine.status === FineStatus.PENDING) {
+                            <app-button variant="ghost" size="sm" (click)="markAsPaid(fine)">Pagar</app-button>
+                          }
+                          <app-button variant="ghost" size="sm" (click)="goToEdit(fine.id)">Editar</app-button>
+                          <app-button variant="ghost" size="sm" (click)="confirmDelete(fine)">Eliminar</app-button>
                         </div>
                       </td>
                     </tr>
@@ -163,36 +189,16 @@ import { Event, EventStatus, EventsSummary, PaginatedEvents } from '@core/models
             }
           }
         </app-card>
-
-        <!-- Upcoming Events -->
-        @if (summary()?.upcomingEvents?.length) {
-          <app-card>
-            <h3 class="section-title">Próximos Eventos</h3>
-            <div class="upcoming-list">
-              @for (event of summary()?.upcomingEvents; track event.id) {
-                <div class="upcoming-item" (click)="goToDetail(event.id)">
-                  <div class="upcoming-item__info">
-                    <span class="upcoming-item__name">{{ event.name }}</span>
-                    <span class="upcoming-item__date">{{ event.eventDate | date:'dd MMM yyyy' }}</span>
-                  </div>
-                  <span class="badge" [class]="'badge--' + getStatusClass(event.status)">
-                    {{ event.status }}
-                  </span>
-                </div>
-              }
-            </div>
-          </app-card>
-        }
       }
 
       @if (showDeleteModal()) {
         <app-confirm-modal
           [isOpen]="true"
-          title="Eliminar Evento"
-          [message]="'¿Está seguro de eliminar el evento ' + (eventToDelete()?.name || '') + '? Esta acción no se puede deshacer.'"
+          title="Eliminar Multa"
+          message="¿Está seguro de eliminar esta multa? Esta acción no se puede deshacer."
           confirmText="Eliminar"
           variant="danger"
-          (confirmed)="deleteEvent()"
+          (confirmed)="deleteFine()"
           (cancelled)="showDeleteModal.set(false)"
         ></app-confirm-modal>
       }
@@ -219,7 +225,31 @@ import { Event, EventStatus, EventsSummary, PaginatedEvents } from '@core/models
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: $spacing-4;
-      margin-bottom: $spacing-6;
+      margin-bottom: $spacing-4;
+    }
+
+    .section-title {
+      font-size: $font-size-lg;
+      font-weight: 600;
+      margin: 0 0 $spacing-4;
+    }
+
+    .category-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: $spacing-3;
+    }
+
+    .category-item {
+      display: flex;
+      flex-direction: column;
+      padding: $spacing-3;
+      background: $gray-100;
+      border-radius: $border-radius-md;
+
+      &__name { font-weight: 500; margin-bottom: $spacing-1; }
+      &__count { font-size: $font-size-sm; color: $text-secondary; }
+      &__amount { font-size: $font-size-lg; font-weight: 600; color: $primary; margin-top: $spacing-2; }
     }
 
     .filters {
@@ -228,7 +258,7 @@ import { Event, EventStatus, EventsSummary, PaginatedEvents } from '@core/models
       flex-wrap: wrap;
       align-items: flex-end;
 
-      app-input, app-select { flex: 1; min-width: 180px; }
+      app-input, app-select { flex: 1; min-width: 150px; }
     }
 
     .table-container {
@@ -255,10 +285,6 @@ import { Event, EventStatus, EventsSummary, PaginatedEvents } from '@core/models
       tbody tr:hover {
         background: $gray-100;
       }
-
-      tbody tr.clickable {
-        cursor: pointer;
-      }
     }
 
     .badge {
@@ -269,10 +295,9 @@ import { Event, EventStatus, EventsSummary, PaginatedEvents } from '@core/models
       font-size: $font-size-xs;
       font-weight: 500;
 
-      &--planned { background-color: rgba($info, 0.1); color: $info; }
-      &--active { background-color: rgba($success, 0.1); color: $success; }
-      &--finished { background-color: rgba($text-secondary, 0.1); color: $text-secondary; }
-      &--cancelled { background-color: rgba($danger, 0.1); color: $danger; }
+      &--pending { background-color: rgba($warning, 0.1); color: $warning; }
+      &--paid { background-color: rgba($success, 0.1); color: $success; }
+      &--category { background-color: rgba($info, 0.1); color: $info; }
     }
 
     .actions {
@@ -293,47 +318,19 @@ import { Event, EventStatus, EventsSummary, PaginatedEvents } from '@core/models
       &__current { font-size: $font-size-sm; font-weight: 500; }
     }
 
-    .section-title {
-      font-size: $font-size-lg;
-      font-weight: 600;
-      margin: 0 0 $spacing-4;
-    }
-
-    .upcoming-list {
-      display: flex;
-      flex-direction: column;
-      gap: $spacing-2;
-    }
-
-    .upcoming-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: $spacing-3;
-      background: $gray-100;
-      border-radius: $border-radius-md;
-      cursor: pointer;
-      transition: background-color 0.2s;
-
-      &:hover { background: $gray-200; }
-      &__info { display: flex; flex-direction: column; gap: $spacing-1; }
-      &__name { font-weight: 500; }
-      &__date { font-size: $font-size-sm; color: $text-secondary; }
-    }
-
     app-card {
       margin-bottom: $spacing-4;
     }
   `]
 })
-export class EventsListComponent implements OnInit {
-  private readonly eventsService = inject(EventsService);
+export class FinesListComponent implements OnInit {
+  private readonly finesService = inject(FinesService);
   private readonly router = inject(Router);
   private readonly toast = inject(ToastService);
 
   loading = signal(true);
-  events = signal<Event[]>([]);
-  summary = signal<EventsSummary | null>(null);
+  fines = signal<Fine[]>([]);
+  summary = signal<FinesSummary | null>(null);
   currentPage = signal(1);
   totalPages = signal(1);
   totalItems = signal(0);
@@ -341,18 +338,26 @@ export class EventsListComponent implements OnInit {
 
   searchTerm = signal('');
   selectedStatus = signal('');
+  selectedCategory = signal('');
 
   showDeleteModal = signal(false);
-  eventToDelete = signal<Event | null>(null);
+  fineToDelete = signal<Fine | null>(null);
 
+  FineStatus = FineStatus;
   String = String;
 
   statusOptions = [
     { value: '', label: 'Todos los estados' },
-    { value: EventStatus.PLANNED, label: 'Planificado' },
-    { value: EventStatus.ACTIVE, label: 'Activo' },
-    { value: EventStatus.FINISHED, label: 'Finalizado' },
-    { value: EventStatus.CANCELLED, label: 'Cancelado' },
+    { value: FineStatus.PENDING, label: 'Pendiente' },
+    { value: FineStatus.PAID, label: 'Pagada' },
+  ];
+
+  categoryOptions = [
+    { value: '', label: 'Todas las categorías' },
+    { value: FineCategory.LATE_PAYMENT, label: 'Mora' },
+    { value: FineCategory.ABSENCE, label: 'Inasistencia' },
+    { value: FineCategory.RULE_VIOLATION, label: 'Incumplimiento' },
+    { value: FineCategory.OTHER, label: 'Otro' },
   ];
 
   ngOnInit(): void {
@@ -361,30 +366,31 @@ export class EventsListComponent implements OnInit {
 
   loadData(): void {
     this.loading.set(true);
-    this.eventsService.getSummary().subscribe({
+    this.finesService.getSummary().subscribe({
       next: (summary) => this.summary.set(summary),
       error: () => this.toast.error('Error al cargar resumen'),
     });
-    this.loadEvents();
+    this.loadFines();
   }
 
-  loadEvents(): void {
+  loadFines(): void {
     const filters = {
       page: this.currentPage(),
       limit: this.pageSize,
       search: this.searchTerm() || undefined,
       status: this.selectedStatus() || undefined,
+      category: this.selectedCategory() || undefined,
     };
 
-    this.eventsService.getEvents(filters).subscribe({
-      next: (response: PaginatedEvents) => {
-        this.events.set(response.data);
+    this.finesService.getFines(filters).subscribe({
+      next: (response: PaginatedFines) => {
+        this.fines.set(response.data);
         this.totalPages.set(response.totalPages);
         this.totalItems.set(response.total);
         this.loading.set(false);
       },
       error: () => {
-        this.toast.error('Error al cargar eventos');
+        this.toast.error('Error al cargar multas');
         this.loading.set(false);
       },
     });
@@ -392,12 +398,13 @@ export class EventsListComponent implements OnInit {
 
   applyFilters(): void {
     this.currentPage.set(1);
-    this.loadEvents();
+    this.loadFines();
   }
 
   clearFilters(): void {
     this.searchTerm.set('');
     this.selectedStatus.set('');
+    this.selectedCategory.set('');
     this.applyFilters();
   }
 
@@ -405,9 +412,13 @@ export class EventsListComponent implements OnInit {
     this.selectedStatus.set(String(value));
   }
 
+  onCategoryChange(value: string | number): void {
+    this.selectedCategory.set(String(value));
+  }
+
   onPageChange(page: number): void {
     this.currentPage.set(page);
-    this.loadEvents();
+    this.loadFines();
   }
 
   startItem(): number {
@@ -418,47 +429,47 @@ export class EventsListComponent implements OnInit {
     return Math.min(this.currentPage() * this.pageSize, this.totalItems());
   }
 
-  goToNewEvent(): void {
-    this.router.navigate(['/events/new']);
-  }
-
-  goToDetail(id: number): void {
-    this.router.navigate(['/events', id]);
+  goToNewFine(): void {
+    this.router.navigate(['/fines/new']);
   }
 
   goToEdit(id: number): void {
-    this.router.navigate(['/events', id, 'edit']);
+    this.router.navigate(['/fines', id, 'edit']);
   }
 
-  confirmDelete(event: Event): void {
-    this.eventToDelete.set(event);
+  markAsPaid(fine: Fine): void {
+    this.finesService.markAsPaid(fine.id).subscribe({
+      next: () => {
+        this.toast.success('Multa marcada como pagada');
+        this.loadData();
+      },
+      error: () => this.toast.error('Error al actualizar multa'),
+    });
+  }
+
+  confirmDelete(fine: Fine): void {
+    this.fineToDelete.set(fine);
     this.showDeleteModal.set(true);
   }
 
-  deleteEvent(): void {
-    const event = this.eventToDelete();
-    if (!event) return;
+  deleteFine(): void {
+    const fine = this.fineToDelete();
+    if (!fine) return;
 
-    this.eventsService.deleteEvent(event.id).subscribe({
+    this.finesService.deleteFine(fine.id).subscribe({
       next: () => {
-        this.toast.success('Evento eliminado exitosamente');
+        this.toast.success('Multa eliminada exitosamente');
         this.showDeleteModal.set(false);
         this.loadData();
       },
       error: () => {
-        this.toast.error('Error al eliminar evento');
+        this.toast.error('Error al eliminar multa');
       },
     });
   }
 
-  getStatusClass(status: EventStatus): string {
-    const statusMap: Record<string, string> = {
-      [EventStatus.PLANNED]: 'planned',
-      [EventStatus.ACTIVE]: 'active',
-      [EventStatus.FINISHED]: 'finished',
-      [EventStatus.CANCELLED]: 'cancelled',
-    };
-    return statusMap[status] || 'planned';
+  getStatusClass(status: FineStatus): string {
+    return status === FineStatus.PENDING ? 'pending' : 'paid';
   }
 
   formatCurrency(value: number): string {

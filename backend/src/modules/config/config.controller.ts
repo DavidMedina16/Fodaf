@@ -9,7 +9,10 @@ import {
   ParseIntPipe,
   UseGuards,
 } from '@nestjs/common';
-import { AppConfigService } from './config.service';
+import {
+  AppConfigService,
+  BulkUpdateConfigDto,
+} from './config.service';
 import { CreateAppConfigDto, UpdateAppConfigDto } from './dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
@@ -28,9 +31,29 @@ export class AppConfigController {
     return this.configService.findAll();
   }
 
+  @Get('system')
+  getSystemConfig() {
+    return this.configService.getSystemConfig();
+  }
+
+  @Get('system/by-category')
+  getSystemConfigByCategory() {
+    return this.configService.getSystemConfigByCategory();
+  }
+
+  @Patch('system')
+  bulkUpdate(@Body() bulkUpdateDto: BulkUpdateConfigDto) {
+    return this.configService.bulkUpdate(bulkUpdateDto);
+  }
+
   @Get('key/:key')
   findByKey(@Param('key') key: string) {
     return this.configService.findByKey(key);
+  }
+
+  @Patch('key/:key')
+  updateByKey(@Param('key') key: string, @Body('value') value: string) {
+    return this.configService.updateByKey(key, value);
   }
 
   @Get(':id')

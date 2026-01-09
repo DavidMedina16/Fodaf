@@ -8,10 +8,12 @@ import {
   Delete,
   ParseIntPipe,
   UseGuards,
+  Query,
 } from '@nestjs/common';
-import { EventsService } from './events.service';
+import { EventsService, EventsFilterDto } from './events.service';
 import { CreateEventDto, UpdateEventDto } from './dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { EventStatus } from '../../entities/event.entity';
 
 @UseGuards(JwtAuthGuard)
 @Controller('events')
@@ -24,13 +26,23 @@ export class EventsController {
   }
 
   @Get()
-  findAll() {
-    return this.eventsService.findAll();
+  findAll(@Query() filters: EventsFilterDto) {
+    return this.eventsService.findAll(filters);
+  }
+
+  @Get('summary')
+  getSummary() {
+    return this.eventsService.getSummary();
   }
 
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.eventsService.findOne(id);
+  }
+
+  @Get(':id/details')
+  findOneWithSummary(@Param('id', ParseIntPipe) id: number) {
+    return this.eventsService.findOneWithSummary(id);
   }
 
   @Patch(':id')
@@ -39,6 +51,14 @@ export class EventsController {
     @Body() updateEventDto: UpdateEventDto,
   ) {
     return this.eventsService.update(id, updateEventDto);
+  }
+
+  @Patch(':id/status')
+  changeStatus(
+    @Param('id', ParseIntPipe) id: number,
+    @Body('status') status: EventStatus,
+  ) {
+    return this.eventsService.changeStatus(id, status);
   }
 
   @Delete(':id')

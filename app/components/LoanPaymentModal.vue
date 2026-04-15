@@ -44,32 +44,18 @@ async function handleSubmit() {
     return
   }
 
-  // 2. Verificar si el préstamo se pagó completamente
+  // 2. Verificar si el préstamo se pagó completamente (RPC con SECURITY DEFINER
+  //    porque con RLS solo el admin puede UPDATE `loans` directamente).
+  await supabase.rpc('mark_loan_paid_if_complete', { p_loan_id: props.loanId })
+
   const { data: loan } = await supabase
     .from('loans')
-    .select('requested_amount, interest_rate')
+    .select('status')
     .eq('id', props.loanId)
     .single()
 
-  const { data: payments } = await supabase
-    .from('loan_payments')
-    .select('amount')
-    .eq('loan_id', props.loanId)
-
-  if (loan && payments) {
-    const totalDue = Math.round(loan.requested_amount * (1 + loan.interest_rate / 100))
-    const totalPaid = payments.reduce((sum, p) => sum + p.amount, 0)
-
-    if (totalPaid >= totalDue) {
-      await supabase
-        .from('loans')
-        .update({ status: 'paid' })
-        .eq('id', props.loanId)
-
-      toast.success('Préstamo pagado en su totalidad.')
-    } else {
-      toast.success('Pago registrado correctamente.')
-    }
+  if (loan?.status === 'paid') {
+    toast.success('Préstamo pagado en su totalidad.')
   } else {
     toast.success('Pago registrado correctamente.')
   }

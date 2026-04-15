@@ -9,17 +9,22 @@ const supabase = useSupabase()
 const profileName = ref('')
 const totalApproved = ref(0)
 const totalDeducted = ref(0)
+const totalWithdrawn = ref(0)
+const allWithdrawals = ref<{ amount: number; status: string; created_at: string }[]>([])
+const activeInvestments = ref<{ name: string; invested_amount: number; annual_interest_rate: number; start_date: string; end_date: string }[]>([])
 const allContributions = ref<{ amount: number; deposit_date: string; status: string }[]>([])
 const pendingPenalties = ref<{ amount: number; reason: string }[]>([])
 const loading = ref(true)
 const showModal = ref(false)
+const showWithdrawalModal = ref(false)
 const showHistory = ref(false)
+const showWithdrawalsHistory = ref(false)
 
 async function loadData() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return
 
-  const [profileResult, approvedResult, allContribResult, deductedResult, pendingPenaltiesResult] = await Promise.all([
+  const [profileResult, approvedResult, allContribResult, deductedResult, pendingPenaltiesResult, withdrawalsResult, investmentsResult] = await Promise.all([
     supabase
       .from('profiles')
       .select('full_name')
@@ -45,6 +50,16 @@ async function loadData() {
       .select('amount, reason')
       .eq('profile_id', user.id)
       .eq('status', 'pending'),
+    supabase
+      .from('withdrawals')
+      .select('amount, status, created_at')
+      .eq('profile_id', user.id)
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('investments')
+      .select('name, invested_amount, annual_interest_rate, start_date, end_date')
+      .eq('status', 'active')
+      .order('created_at', { ascending: false }),
   ])
 
   if (profileResult.data) {
@@ -59,12 +74,46 @@ async function loadData() {
     ? deductedResult.data.reduce((sum, p) => sum + p.amount, 0)
     : 0
 
+  allWithdrawals.value = withdrawalsResult.data ?? []
+
+  totalWithdrawn.value = allWithdrawals.value
+    .filter(w => w.status === 'approved')
+    .reduce((sum, w) => sum + w.amount, 0)
+
   allContributions.value = allContribResult.data ?? []
   pendingPenalties.value = pendingPenaltiesResult.data ?? []
+  activeInvestments.value = investmentsResult.data ?? []
   loading.value = false
 }
 
-const totalSavings = computed(() => Math.max(0, totalApproved.value - totalDeducted.value))
+const totalInvested = computed(() =>
+  activeInvestments.value.reduce((sum, i) => sum + i.invested_amount, 0),
+)
+
+function daysBetween(from: string, to: Date): number {
+  const start = new Date(from + 'T00:00:00')
+  const diffMs = to.getTime() - start.getTime()
+  return Math.max(0, Math.floor(diffMs / (1000 * 60 * 60 * 24)))
+}
+
+function accruedInterest(inv: { invested_amount: number; annual_interest_rate: number; start_date: string; end_date: string }): number {
+  const now = new Date()
+  const end = new Date(inv.end_date + 'T23:59:59')
+  const cutoff = now > end ? end : now
+  const elapsed = daysBetween(inv.start_date, cutoff)
+  return inv.invested_amount * (inv.annual_interest_rate / 100) * (elapsed / 365)
+}
+
+function projectedInterest(inv: { invested_amount: number; annual_interest_rate: number; start_date: string; end_date: string }): number {
+  const total = daysBetween(inv.start_date, new Date(inv.end_date + 'T23:59:59'))
+  return inv.invested_amount * (inv.annual_interest_rate / 100) * (total / 365)
+}
+
+const totalAccruedInterest = computed(() =>
+  activeInvestments.value.reduce((sum, i) => sum + accruedInterest(i), 0),
+)
+
+const totalSavings = computed(() => Math.max(0, totalApproved.value - totalDeducted.value - totalWithdrawn.value))
 
 const pendingContributions = computed(() =>
   allContributions.value.filter(c => c.status === 'pending'),
@@ -107,6 +156,10 @@ function formatDate(dateStr: string): string {
 }
 
 async function onContributionSaved() {
+  await loadData()
+}
+
+async function onWithdrawalSaved() {
   await loadData()
 }
 
@@ -167,12 +220,19 @@ onMounted(loadData)
               Total de aportes aprobados.
             </p>
           </div>
-          <div class="flex shrink-0 gap-2">
+          <div class="flex shrink-0 flex-wrap justify-end gap-2">
             <button
               class="rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-emerald-500 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:ring-offset-gray-900 transition"
               @click="showModal = true"
             >
               + Registrar Aporte
+            </button>
+            <button
+              :disabled="totalSavings <= 0"
+              class="rounded-lg bg-amber-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-amber-500 focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:ring-offset-gray-900 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              @click="showWithdrawalModal = true"
+            >
+              Solicitar Retiro
             </button>
             <NuxtLink
               to="/prestamos/solicitar"
@@ -230,6 +290,97 @@ onMounted(loadData)
           </li>
         </ul>
       </div>
+
+      <!-- Inversiones activas del fondo -->
+      <div
+        v-if="activeInvestments.length > 0"
+        class="mt-4 rounded-2xl border border-blue-500/30 bg-gradient-to-br from-blue-600/10 to-violet-600/10 p-6"
+      >
+        <div class="flex items-center gap-3 mb-4">
+          <div class="h-10 w-10 rounded-xl bg-blue-500/20 flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-300" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" clip-rule="evenodd" />
+            </svg>
+          </div>
+          <div class="flex-1">
+            <p class="text-sm font-semibold text-blue-200">Nuestro dinero trabajando</p>
+            <p class="text-xs text-blue-300/70">
+              Invertido: <span class="font-semibold text-blue-200">{{ formatCOP(totalInvested) }}</span>
+              · Rendimiento acumulado:
+              <span class="font-semibold text-emerald-300">{{ formatCOP(totalAccruedInterest) }}</span>
+            </p>
+          </div>
+        </div>
+
+        <ul class="space-y-2">
+          <li
+            v-for="(inv, i) in activeInvestments"
+            :key="i"
+            class="rounded-lg bg-gray-900/50 px-4 py-3"
+          >
+            <div class="flex items-start justify-between gap-3">
+              <div class="min-w-0">
+                <p class="text-sm font-medium text-white truncate">{{ inv.name }}</p>
+                <p class="text-xs text-gray-400 mt-0.5">
+                  Tasa anual: <span class="text-emerald-400 font-medium">{{ inv.annual_interest_rate }}%</span>
+                  · Vence {{ formatDate(inv.end_date) }}
+                </p>
+              </div>
+              <div class="text-right shrink-0">
+                <p class="text-sm font-semibold text-white">{{ formatCOP(inv.invested_amount) }}</p>
+                <p class="text-xs text-emerald-400 mt-0.5">
+                  +{{ formatCOP(accruedInterest(inv)) }}
+                </p>
+              </div>
+            </div>
+            <p class="text-[11px] text-gray-500 mt-2">
+              Proyectado al vencimiento: <span class="text-gray-300 font-medium">{{ formatCOP(projectedInterest(inv)) }}</span>
+            </p>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Historial de Retiros -->
+      <div
+        v-if="allWithdrawals.length > 0"
+        class="mt-4 bg-gray-900 rounded-2xl border border-gray-800 p-6"
+      >
+        <div class="flex items-center justify-between mb-4">
+          <p class="text-sm font-medium text-gray-400 uppercase tracking-wider">
+            Historial de Retiros
+          </p>
+          <button
+            v-if="allWithdrawals.length > 5"
+            class="text-xs text-gray-500 hover:text-gray-300 transition"
+            @click="showWithdrawalsHistory = !showWithdrawalsHistory"
+          >
+            {{ showWithdrawalsHistory ? 'Ver menos' : `Ver todos (${allWithdrawals.length})` }}
+          </button>
+        </div>
+
+        <ul class="space-y-2">
+          <li
+            v-for="(withdrawal, i) in (showWithdrawalsHistory ? allWithdrawals : allWithdrawals.slice(0, 5))"
+            :key="i"
+            class="flex items-center justify-between rounded-lg bg-gray-800/50 px-4 py-3"
+          >
+            <div class="flex items-center gap-3">
+              <span
+                class="px-2 py-0.5 text-xs font-medium rounded-full"
+                :class="statusClasses[withdrawal.status] ?? 'bg-gray-500/20 text-gray-400'"
+              >
+                {{ statusLabel[withdrawal.status] ?? withdrawal.status }}
+              </span>
+              <span class="text-sm text-gray-300">
+                {{ formatDate(withdrawal.created_at.slice(0, 10)) }}
+              </span>
+            </div>
+            <span class="text-sm font-medium text-white">
+              {{ formatCOP(withdrawal.amount) }}
+            </span>
+          </li>
+        </ul>
+      </div>
     </template>
 
     <!-- Modal -->
@@ -237,6 +388,13 @@ onMounted(loadData)
       :visible="showModal"
       @close="showModal = false"
       @saved="onContributionSaved"
+    />
+
+    <WithdrawalModal
+      :visible="showWithdrawalModal"
+      :available-savings="totalSavings"
+      @close="showWithdrawalModal = false"
+      @saved="onWithdrawalSaved"
     />
   </div>
 </template>

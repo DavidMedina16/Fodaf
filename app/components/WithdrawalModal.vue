@@ -1,8 +1,7 @@
 <script setup lang="ts">
 const props = defineProps<{
   visible: boolean
-  loanId: string
-  remainingBalance: number
+  availableSavings: number
 }>()
 
 const emit = defineEmits<{
@@ -14,9 +13,11 @@ const supabase = useSupabase()
 const toast = useToast()
 
 const amount = ref<number | null>(null)
-const { toLocalDate } = useLocalDate()
-const paymentDate = ref(toLocalDate())
 const submitting = ref(false)
+
+const exceedsAvailable = computed(() =>
+  amount.value !== null && amount.value > props.availableSavings,
+)
 
 function formatCOP(value: number): string {
   return new Intl.NumberFormat('es-CO', {
@@ -29,40 +30,34 @@ function formatCOP(value: number): string {
 async function handleSubmit() {
   if (!amount.value || amount.value <= 0) return
 
+  if (amount.value > props.availableSavings) {
+    toast.error(`El monto supera tu ahorro disponible (${formatCOP(props.availableSavings)}).`)
+    return
+  }
+
   submitting.value = true
 
-  // 1. Insertar el pago
-  const { error: insertError } = await supabase.from('loan_payments').insert({
-    loan_id: props.loanId,
-    amount: amount.value,
-    payment_date: paymentDate.value,
-  })
-
-  if (insertError) {
-    toast.error('Error al registrar el pago. Intenta de nuevo.')
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
     submitting.value = false
     return
   }
 
-  // 2. Verificar si el préstamo se pagó completamente (RPC con SECURITY DEFINER
-  //    porque con RLS solo el admin puede UPDATE `loans` directamente).
-  await supabase.rpc('mark_loan_paid_if_complete', { p_loan_id: props.loanId })
-
-  const { data: loan } = await supabase
-    .from('loans')
-    .select('status')
-    .eq('id', props.loanId)
-    .single()
-
-  if (loan?.status === 'paid') {
-    toast.success('Préstamo pagado en su totalidad.')
-  } else {
-    toast.success('Pago registrado correctamente.')
-  }
+  const { error } = await supabase.from('withdrawals').insert({
+    profile_id: user.id,
+    amount: amount.value,
+    status: 'pending',
+  })
 
   submitting.value = false
+
+  if (error) {
+    toast.error('Error al registrar el retiro. Intenta de nuevo.')
+    return
+  }
+
+  toast.success('Solicitud de retiro enviada. En espera de aprobación del administrador.')
   amount.value = null
-  paymentDate.value = toLocalDate()
   emit('saved')
   emit('close')
 }
@@ -82,17 +77,14 @@ async function handleSubmit() {
         v-if="visible"
         class="fixed inset-0 z-50 flex items-center justify-center px-4"
       >
-        <!-- Backdrop -->
         <div
           class="absolute inset-0 bg-black/60"
           @click="emit('close')"
         />
 
-        <!-- Modal -->
         <div class="relative w-full max-w-md bg-gray-900 rounded-2xl border border-gray-800 shadow-2xl p-8">
-          <!-- Header -->
           <div class="flex items-center justify-between mb-6">
-            <h2 class="text-xl font-bold text-white">Abonar a la Deuda</h2>
+            <h2 class="text-xl font-bold text-white">Solicitar Retiro</h2>
             <button
               class="text-gray-500 hover:text-white transition"
               @click="emit('close')"
@@ -103,54 +95,41 @@ async function handleSubmit() {
             </button>
           </div>
 
-          <!-- Saldo info -->
-          <div class="rounded-lg bg-gray-800/50 px-4 py-3 mb-5">
-            <div class="flex items-center justify-between">
-              <span class="text-sm text-gray-400">Saldo pendiente</span>
-              <span class="text-sm font-semibold text-white">{{ formatCOP(remainingBalance) }}</span>
-            </div>
+          <div class="mb-5 rounded-lg bg-gray-800/50 px-4 py-3">
+            <p class="text-xs text-gray-400 uppercase tracking-wider">Ahorro disponible</p>
+            <p class="text-xl font-bold text-emerald-400 mt-1">{{ formatCOP(availableSavings) }}</p>
           </div>
 
-          <!-- Form -->
           <form @submit.prevent="handleSubmit" class="space-y-5">
-            <!-- Monto -->
             <div>
-              <label for="payment-amount" class="block text-sm font-medium text-gray-300 mb-1">
-                Monto a abonar (COP)
+              <label for="withdrawal-amount" class="block text-sm font-medium text-gray-300 mb-1">
+                Monto a retirar (COP)
               </label>
               <input
-                id="payment-amount"
+                id="withdrawal-amount"
                 v-model.number="amount"
                 type="number"
                 required
                 min="1"
-                :max="remainingBalance"
+                :max="availableSavings"
+                step="1"
                 placeholder="50000"
                 class="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-2.5 text-white placeholder-gray-500 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition"
               />
+              <p
+                v-if="exceedsAvailable"
+                class="text-xs text-red-400 mt-1"
+              >
+                El monto supera tu ahorro disponible.
+              </p>
             </div>
 
-            <!-- Fecha -->
-            <div>
-              <label for="payment-date" class="block text-sm font-medium text-gray-300 mb-1">
-                Fecha de pago
-              </label>
-              <input
-                id="payment-date"
-                v-model="paymentDate"
-                type="date"
-                required
-                class="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-2.5 text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition"
-              />
-            </div>
-
-            <!-- Submit -->
             <button
               type="submit"
-              :disabled="submitting"
+              :disabled="submitting || exceedsAvailable || !amount"
               class="w-full rounded-lg bg-emerald-600 py-2.5 text-white font-semibold hover:bg-emerald-500 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:ring-offset-gray-900 transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {{ submitting ? 'Registrando...' : 'Registrar Pago' }}
+              {{ submitting ? 'Enviando...' : 'Enviar Solicitud' }}
             </button>
           </form>
         </div>

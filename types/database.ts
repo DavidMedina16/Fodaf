@@ -9,6 +9,8 @@ export type ContributionStatus = 'pending' | 'approved' | 'rejected'
 export type LoanStatus = 'pending' | 'active' | 'paid' | 'defaulted' | 'rejected'
 export type PenaltyReason = 'absence' | 'late_arrival' | 'other'
 export type PenaltyStatus = 'pending' | 'paid' | 'deducted_from_savings'
+export type WithdrawalStatus = 'pending' | 'approved' | 'rejected'
+export type InvestmentStatus = 'active' | 'completed'
 
 // ---- Tables ----
 
@@ -58,6 +60,7 @@ export interface Team {
 export interface TeamMember {
   team_id: string
   profile_id: string
+  role_title: string | null
 }
 
 export interface Activity {
@@ -87,6 +90,26 @@ export interface Penalty {
   created_at: string
 }
 
+export interface Withdrawal {
+  id: string
+  profile_id: string
+  amount: number
+  status: WithdrawalStatus
+  created_at: string
+}
+
+export interface Investment {
+  id: string
+  name: string
+  invested_amount: number
+  annual_interest_rate: number
+  start_date: string
+  end_date: string
+  status: InvestmentStatus
+  actual_return: number | null
+  created_at: string
+}
+
 // ---- Database schema map (útil para tipado genérico) ----
 
 export interface Database {
@@ -99,4 +122,6 @@ export interface Database {
   activities: Activity
   meetings: Meeting
   penalties: Penalty
+  withdrawals: Withdrawal
+  investments: Investment
 }

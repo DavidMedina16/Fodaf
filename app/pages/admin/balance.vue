@@ -6,15 +6,18 @@ definePageMeta({
 
 const supabase = useSupabase()
 
-const totalSavings = ref(0)
+const totalContributions = ref(0)
 const totalActiveLoans = ref(0)
 const totalActivityProfits = ref(0)
 const totalPenaltiesCollected = ref(0)
+const totalWithdrawals = ref(0)
+const totalInvested = ref(0)
+const totalInvestmentReturns = ref(0)
 const totalMembers = ref(0)
 const loading = ref(true)
 
 onMounted(async () => {
-  const [savingsResult, loansResult, activitiesResult, penaltiesResult, membersResult] = await Promise.all([
+  const [savingsResult, loansResult, activitiesResult, penaltiesResult, withdrawalsResult, investmentsResult, completedInvestmentsResult, membersResult] = await Promise.all([
     supabase
       .from('contributions')
       .select('amount')
@@ -31,11 +34,23 @@ onMounted(async () => {
       .select('amount, status')
       .in('status', ['paid', 'deducted_from_savings']),
     supabase
+      .from('withdrawals')
+      .select('amount')
+      .eq('status', 'approved'),
+    supabase
+      .from('investments')
+      .select('invested_amount')
+      .eq('status', 'active'),
+    supabase
+      .from('investments')
+      .select('actual_return')
+      .eq('status', 'completed'),
+    supabase
       .from('profiles')
       .select('id', { count: 'exact', head: true }),
   ])
 
-  totalSavings.value = savingsResult.data
+  totalContributions.value = savingsResult.data
     ? savingsResult.data.reduce((sum, c) => sum + c.amount, 0)
     : 0
 
@@ -51,13 +66,34 @@ onMounted(async () => {
     ? penaltiesResult.data.reduce((sum, p) => sum + p.amount, 0)
     : 0
 
+  totalWithdrawals.value = withdrawalsResult.data
+    ? withdrawalsResult.data.reduce((sum, w) => sum + w.amount, 0)
+    : 0
+
+  totalInvested.value = investmentsResult.data
+    ? investmentsResult.data.reduce((sum, i) => sum + i.invested_amount, 0)
+    : 0
+
+  totalInvestmentReturns.value = completedInvestmentsResult.data
+    ? completedInvestmentsResult.data.reduce((sum, i) => sum + (i.actual_return ?? 0), 0)
+    : 0
+
   totalMembers.value = membersResult.count ?? 0
 
   loading.value = false
 })
 
+const totalSavings = computed(() =>
+  Math.max(0, totalContributions.value - totalWithdrawals.value),
+)
+
 const capitalInHand = computed(() =>
-  totalSavings.value + totalActivityProfits.value + totalPenaltiesCollected.value - totalActiveLoans.value,
+  totalSavings.value
+  + totalActivityProfits.value
+  + totalPenaltiesCollected.value
+  + totalInvestmentReturns.value
+  - totalActiveLoans.value
+  - totalInvested.value,
 )
 
 function formatCOP(value: number): string {
@@ -91,9 +127,9 @@ function formatCOP(value: number): string {
       <div class="bg-gradient-to-br from-violet-600/20 to-blue-600/20 rounded-2xl border border-violet-500/30 p-8 mb-6">
         <div class="flex items-center justify-between">
           <div>
-            <p class="text-sm font-medium text-violet-300 uppercase tracking-wider">Capital Actual en Caja</p>
+            <p class="text-sm font-medium text-violet-300 uppercase tracking-wider">Capital Actual en Caja (Disponible)</p>
             <p class="text-5xl font-bold text-white mt-3">{{ formatCOP(capitalInHand) }}</p>
-            <p class="text-sm text-violet-300/70 mt-2">Ahorros + Ganancias + Multas − Préstamos activos</p>
+            <p class="text-sm text-violet-300/70 mt-2">Ahorros + Ganancias actividades + Ganancias CDT + Multas − Préstamos − Inversiones activas</p>
           </div>
           <div class="hidden sm:block">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-20 w-20 text-violet-500/30" viewBox="0 0 20 20" fill="currentColor">
@@ -117,7 +153,10 @@ function formatCOP(value: number): string {
             <p class="text-sm font-medium text-gray-400">Total Ahorrado</p>
           </div>
           <p class="text-2xl font-bold text-emerald-400">{{ formatCOP(totalSavings) }}</p>
-          <p class="text-xs text-gray-500 mt-1">Aportes aprobados de todos los miembros</p>
+          <p class="text-xs text-gray-500 mt-1">
+            Aportes aprobados menos retiros
+            <span v-if="totalWithdrawals > 0">(−{{ formatCOP(totalWithdrawals) }})</span>
+          </p>
         </div>
 
         <!-- Ganancias Actividades -->
@@ -160,6 +199,34 @@ function formatCOP(value: number): string {
           </div>
           <p class="text-2xl font-bold text-orange-400">{{ formatCOP(totalActiveLoans) }}</p>
           <p class="text-xs text-gray-500 mt-1">Capital prestado pendiente de cobro</p>
+        </div>
+
+        <!-- Dinero en Inversiones -->
+        <div class="bg-gray-900 rounded-2xl border border-gray-800 p-6">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="h-10 w-10 rounded-xl bg-blue-500/10 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
+              </svg>
+            </div>
+            <p class="text-sm font-medium text-gray-400">Dinero en Inversiones (CDT)</p>
+          </div>
+          <p class="text-2xl font-bold text-blue-400">{{ formatCOP(totalInvested) }}</p>
+          <p class="text-xs text-gray-500 mt-1">Capital en inversiones externas activas</p>
+        </div>
+
+        <!-- Ganancias por Inversiones (CDT) -->
+        <div class="bg-gray-900 rounded-2xl border border-gray-800 p-6">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="h-10 w-10 rounded-xl bg-cyan-500/10 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-cyan-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 7.234 6 8.005 6 9c0 .995.602 1.766 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V17a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 15.766 14 14.995 14 14c0-.995-.602-1.766-1.324-2.246A4.535 4.535 0 0011 11.092V9.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V6z" clip-rule="evenodd" />
+              </svg>
+            </div>
+            <p class="text-sm font-medium text-gray-400">Ganancias por Inversiones (CDT)</p>
+          </div>
+          <p class="text-2xl font-bold text-cyan-400">{{ formatCOP(totalInvestmentReturns) }}</p>
+          <p class="text-xs text-gray-500 mt-1">Rendimientos reales recibidos al finalizar CDT</p>
         </div>
       </div>
 

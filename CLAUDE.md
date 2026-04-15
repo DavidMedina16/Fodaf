@@ -20,8 +20,11 @@ Sistema financiero cerrado para gestionar los ahorros, préstamos, eventos y mul
 - `pnpm build` — Build de producción
 - `npx supabase start` — Iniciar Supabase local (Studio: http://127.0.0.1:54323)
 - `npx supabase stop` — Detener Supabase local
-- `npx supabase db reset` — Resetear DB local (re-aplica migraciones + seed)
 - `npx supabase migration new <nombre>` — Crear nueva migración
+- `npx supabase migration up` — **Aplicar solo migraciones pendientes** (preserva datos). Úsalo en el día a día.
+- `npx supabase db reset` — Resetear DB local (borra todo, re-aplica migraciones + seed). Úsalo solo cuando cambies el seed o modifiques una migración ya aplicada.
+
+**Regla:** nunca editar una migración ya aplicada. Si necesitas un cambio, crear una nueva migración (`alter table`, etc.).
 
 ## Arquitectura y Convenciones
 - Código fuertemente tipado con interfaces explícitas en TypeScript.
@@ -58,10 +61,12 @@ Tablas en PostgreSQL (Supabase), relacionadas mediante UUIDs:
 - `loans` — (id, profile_id, guarantor_id, requested_amount, interest_rate, installments, status, created_at). Status: `pending`, `active`, `paid`, `defaulted`, `rejected`.
 - `loan_payments` — (id, loan_id, amount, payment_date, created_at).
 - `teams` — (id, name, term, created_at).
-- `team_members` — (team_id, profile_id). PK compuesta.
+- `team_members` — (team_id, profile_id, role_title). PK compuesta. `role_title` es opcional y representa el cargo dentro del equipo (ej. "Presidente", "Tesorero", "Secretario").
 - `activities` — (id, team_id, name, activity_date, costs, net_profits, created_at).
 - `meetings` — (id, topic, meeting_date, created_at).
 - `penalties` — (id, profile_id, meeting_id, reason, amount, status, created_at). Reason: `absence`, `late_arrival`, `other`. Status: `pending`, `paid`, `deducted_from_savings`.
+- `withdrawals` — (id, profile_id, amount, status, created_at). Status: `pending`, `approved`, `rejected`. Representa solicitudes de retiro de ahorros.
+- `investments` — (id, name, invested_amount, annual_interest_rate, start_date, end_date, status, actual_return, created_at). Status: `active`, `completed`. `actual_return` se llena cuando se finaliza la inversión y representa el rendimiento real obtenido (entra al Capital en Caja).
 
 ## Reglas de Negocio y Estatutos (ESTRICTO)
 

@@ -1,18 +1,21 @@
 <script setup lang="ts">
+interface PenaltyRow {
+  id: string
+  profile_id: string
+  amount: number
+  reason: 'absence' | 'late_arrival' | 'other'
+  status: 'pending' | 'paid' | 'deducted_from_savings'
+  profiles: {
+    full_name: string
+  }
+}
+
 interface Meeting {
   id: string
   topic: string
   meeting_date: string
   created_at: string
-  penalties: {
-    id: string
-    amount: number
-    reason: string
-    status: string
-    profiles: {
-      full_name: string
-    }
-  }[]
+  penalties: PenaltyRow[]
 }
 
 interface ProfileOption {
@@ -43,19 +46,28 @@ const penaltyModalVisible = ref(false)
 const selectedMeetingId = ref('')
 const processingPenaltyId = ref<string | null>(null)
 
+// Edición inline
+const editingMeeting = ref<Meeting | null>(null)
+const editingPenalty = ref<(PenaltyRow & { meeting_id: string }) | null>(null)
+const saving = ref(false)
+
+// Borrado
+const deleteTarget = ref<{ kind: 'meeting' | 'penalty'; id: string; label: string } | null>(null)
+const deleting = ref(false)
+
 async function loadData() {
   const [meetingsResult, membersResult] = await Promise.all([
     supabase
       .from('meetings')
-      .select('id, topic, meeting_date, created_at, penalties(id, amount, reason, status, profiles(full_name))')
+      .select('id, topic, meeting_date, created_at, penalties(id, profile_id, amount, reason, status, profiles(full_name))')
       .order('meeting_date', { ascending: false }),
     supabase
       .from('profiles')
       .select('id, full_name'),
   ])
 
-  meetings.value = (meetingsResult.data as Meeting[]) ?? []
-  members.value = (membersResult.data as ProfileOption[]) ?? []
+  meetings.value = (meetingsResult.data as unknown as Meeting[]) ?? []
+  members.value = (membersResult.data as unknown as ProfileOption[]) ?? []
   loading.value = false
 }
 
@@ -111,6 +123,87 @@ const statusLabels: Record<string, string> = {
 function openPenaltyModal(meetingId: string) {
   selectedMeetingId.value = meetingId
   penaltyModalVisible.value = true
+}
+
+function openEditMeeting(m: Meeting) {
+  editingMeeting.value = {
+    ...m,
+    meeting_date: toLocalDatetime(new Date(m.meeting_date)),
+  }
+}
+
+async function saveMeeting() {
+  if (!editingMeeting.value) return
+  saving.value = true
+  const { error } = await supabase
+    .from('meetings')
+    .update({
+      topic: editingMeeting.value.topic,
+      meeting_date: editingMeeting.value.meeting_date,
+    })
+    .eq('id', editingMeeting.value.id)
+  saving.value = false
+  if (error) {
+    toast.error('Error al guardar la reunión.')
+    return
+  }
+  toast.success('Reunión actualizada.')
+  editingMeeting.value = null
+  await loadData()
+}
+
+function openEditPenalty(p: PenaltyRow, meetingId: string) {
+  editingPenalty.value = { ...p, meeting_id: meetingId }
+}
+
+async function savePenalty() {
+  if (!editingPenalty.value) return
+  saving.value = true
+  const p = editingPenalty.value
+  const { error } = await supabase
+    .from('penalties')
+    .update({
+      profile_id: p.profile_id,
+      amount: p.amount,
+      reason: p.reason,
+      status: p.status,
+    })
+    .eq('id', p.id)
+  saving.value = false
+  if (error) {
+    toast.error('Error al guardar la multa.')
+    return
+  }
+  toast.success('Multa actualizada.')
+  editingPenalty.value = null
+  await loadData()
+}
+
+function askDeleteMeeting(m: Meeting) {
+  deleteTarget.value = { kind: 'meeting', id: m.id, label: `la reunión "${m.topic}"` }
+}
+
+function askDeletePenalty(p: PenaltyRow) {
+  deleteTarget.value = {
+    kind: 'penalty',
+    id: p.id,
+    label: `la multa de ${p.profiles.full_name} (${formatCOP(p.amount)})`,
+  }
+}
+
+async function confirmDelete() {
+  if (!deleteTarget.value) return
+  deleting.value = true
+  const table = deleteTarget.value.kind === 'meeting' ? 'meetings' : 'penalties'
+  const { error } = await supabase.from(table).delete().eq('id', deleteTarget.value.id)
+  deleting.value = false
+  if (error) {
+    toast.error(`No se pudo eliminar: ${error.message}`)
+    return
+  }
+  toast.success('Registro eliminado.')
+  deleteTarget.value = null
+  await loadData()
 }
 
 const reasonLabels: Record<string, string> = {
@@ -213,12 +306,32 @@ onMounted(loadData)
             <h3 class="text-lg font-semibold text-white">{{ meeting.topic }}</h3>
             <p class="text-sm text-gray-400 mt-0.5">{{ formatDateTime(meeting.meeting_date) }}</p>
           </div>
-          <button
-            class="shrink-0 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-500 transition"
-            @click="openPenaltyModal(meeting.id)"
-          >
-            + Registrar Multa
-          </button>
+          <div class="flex items-center gap-2 shrink-0">
+            <button
+              class="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-500 transition"
+              @click="openPenaltyModal(meeting.id)"
+            >
+              + Registrar Multa
+            </button>
+            <button
+              class="rounded-lg bg-gray-700 p-2 text-gray-300 hover:bg-gray-600 hover:text-white transition"
+              title="Editar reunión"
+              @click="openEditMeeting(meeting)"
+            >
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125" />
+              </svg>
+            </button>
+            <button
+              class="rounded-lg bg-red-500/10 p-2 text-red-400 hover:bg-red-500/20 transition"
+              title="Eliminar reunión"
+              @click="askDeleteMeeting(meeting)"
+            >
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+              </svg>
+            </button>
+          </div>
         </div>
 
         <!-- Multas de esta reunión -->
@@ -250,7 +363,7 @@ onMounted(loadData)
                   {{ statusLabels[penalty.status] ?? penalty.status }}
                 </span>
               </div>
-              <div class="flex items-center gap-3">
+              <div class="flex items-center gap-2">
                 <span class="text-sm font-semibold text-red-400">{{ formatCOP(penalty.amount) }}</span>
                 <template v-if="penalty.status === 'pending'">
                   <button
@@ -268,6 +381,24 @@ onMounted(loadData)
                     Descontar
                   </button>
                 </template>
+                <button
+                  class="rounded-md bg-gray-700 p-1 text-gray-300 hover:bg-gray-600 hover:text-white transition"
+                  title="Editar multa"
+                  @click="openEditPenalty(penalty, meeting.id)"
+                >
+                  <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125" />
+                  </svg>
+                </button>
+                <button
+                  class="rounded-md bg-red-500/10 p-1 text-red-400 hover:bg-red-500/20 transition"
+                  title="Eliminar multa"
+                  @click="askDeletePenalty(penalty)"
+                >
+                  <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                  </svg>
+                </button>
               </div>
             </div>
           </div>
@@ -284,6 +415,148 @@ onMounted(loadData)
       :members="members"
       @close="penaltyModalVisible = false"
       @saved="loadData"
+    />
+
+    <!-- Modal editar reunión -->
+    <Teleport to="body">
+      <Transition
+        enter-active-class="transition duration-200 ease-out"
+        enter-from-class="opacity-0"
+        enter-to-class="opacity-100"
+        leave-active-class="transition duration-150 ease-in"
+        leave-from-class="opacity-100"
+        leave-to-class="opacity-0"
+      >
+        <div v-if="editingMeeting" class="fixed inset-0 z-50 flex items-center justify-center px-4">
+          <div class="absolute inset-0 bg-black/60" @click="editingMeeting = null" />
+          <div class="relative w-full max-w-md bg-gray-900 rounded-2xl border border-gray-800 shadow-2xl p-8">
+            <h2 class="text-xl font-bold text-white mb-6">Editar Reunión</h2>
+            <form class="space-y-4" @submit.prevent="saveMeeting">
+              <div>
+                <label class="block text-sm font-medium text-gray-300 mb-1">Tema</label>
+                <input
+                  v-model="editingMeeting.topic"
+                  type="text"
+                  required
+                  class="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-2.5 text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-300 mb-1">Fecha y hora</label>
+                <input
+                  v-model="editingMeeting.meeting_date"
+                  type="datetime-local"
+                  required
+                  class="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-2.5 text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none"
+                />
+              </div>
+              <div class="flex gap-2 pt-2">
+                <button
+                  type="button"
+                  class="flex-1 rounded-lg bg-gray-700 py-2.5 text-sm font-semibold text-white hover:bg-gray-600 transition"
+                  @click="editingMeeting = null"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  :disabled="saving"
+                  class="flex-1 rounded-lg bg-emerald-600 py-2.5 text-sm font-semibold text-white hover:bg-emerald-500 transition disabled:opacity-50"
+                >
+                  {{ saving ? 'Guardando...' : 'Guardar' }}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
+
+    <!-- Modal editar multa -->
+    <Teleport to="body">
+      <Transition
+        enter-active-class="transition duration-200 ease-out"
+        enter-from-class="opacity-0"
+        enter-to-class="opacity-100"
+        leave-active-class="transition duration-150 ease-in"
+        leave-from-class="opacity-100"
+        leave-to-class="opacity-0"
+      >
+        <div v-if="editingPenalty" class="fixed inset-0 z-50 flex items-center justify-center px-4">
+          <div class="absolute inset-0 bg-black/60" @click="editingPenalty = null" />
+          <div class="relative w-full max-w-md bg-gray-900 rounded-2xl border border-gray-800 shadow-2xl p-8">
+            <h2 class="text-xl font-bold text-white mb-6">Editar Multa</h2>
+            <form class="space-y-4" @submit.prevent="savePenalty">
+              <div>
+                <label class="block text-sm font-medium text-gray-300 mb-1">Miembro</label>
+                <select
+                  v-model="editingPenalty.profile_id"
+                  class="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-2.5 text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none"
+                >
+                  <option v-for="m in members" :key="m.id" :value="m.id">{{ m.full_name }}</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-300 mb-1">Motivo</label>
+                <select
+                  v-model="editingPenalty.reason"
+                  class="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-2.5 text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none"
+                >
+                  <option value="absence">Inasistencia</option>
+                  <option value="late_arrival">Llegada tarde</option>
+                  <option value="other">Otro</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-300 mb-1">Monto (COP)</label>
+                <input
+                  v-model.number="editingPenalty.amount"
+                  type="number"
+                  min="1"
+                  required
+                  class="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-2.5 text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-300 mb-1">Estado</label>
+                <select
+                  v-model="editingPenalty.status"
+                  class="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-2.5 text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none"
+                >
+                  <option value="pending">Pendiente</option>
+                  <option value="paid">Pagada</option>
+                  <option value="deducted_from_savings">Descontada</option>
+                </select>
+              </div>
+              <div class="flex gap-2 pt-2">
+                <button
+                  type="button"
+                  class="flex-1 rounded-lg bg-gray-700 py-2.5 text-sm font-semibold text-white hover:bg-gray-600 transition"
+                  @click="editingPenalty = null"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  :disabled="saving"
+                  class="flex-1 rounded-lg bg-emerald-600 py-2.5 text-sm font-semibold text-white hover:bg-emerald-500 transition disabled:opacity-50"
+                >
+                  {{ saving ? 'Guardando...' : 'Guardar' }}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
+
+    <ConfirmModal
+      :visible="deleteTarget !== null"
+      title="Eliminar registro"
+      :message="`¿Seguro que quieres eliminar ${deleteTarget?.label ?? ''}? Esta acción no se puede deshacer.`"
+      :loading="deleting"
+      @cancel="deleteTarget = null"
+      @confirm="confirmDelete"
     />
   </div>
 </template>

@@ -49,7 +49,7 @@ async function loadLoans() {
     .in('status', ['active', 'pending', 'paid'])
     .order('created_at', { ascending: false })
 
-  loans.value = (data as LoanWithPayments[]) ?? []
+  loans.value = (data as unknown as LoanWithPayments[]) ?? []
   loading.value = false
 }
 

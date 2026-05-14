@@ -27,32 +27,17 @@ interface FieldGroup {
 
 const fieldGroups: FieldGroup[] = [
   {
-    title: 'Ingreso y Admisión',
-    iconPath: 'M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0ZM3 19.235v-.11a6.375 6.375 0 0 1 12.75 0v.109A12.318 12.318 0 0 1 9.374 21c-2.331 0-4.512-.645-6.374-1.766Z',
-    fields: [
-      { key: 'admission_fee', label: 'Cuota de admisión', suffix: 'COP', min: 0, step: 1, hint: 'Monto que paga un miembro nuevo al ingresar al fondo.' },
-      { key: 'reentry_multiplier', label: 'Multiplicador de reingreso', suffix: '×', min: 1, step: 0.5, hint: 'La cuota de reingreso es la admisión multiplicada por este factor.' },
-      { key: 'enrollment_deadline_day', label: 'Día límite para ingresar (enero)', suffix: 'día', min: 1, max: 31, step: 1 },
-      { key: 'admission_exemption_year', label: 'Año de exención de admisión', suffix: 'año', min: 2000, step: 1, hint: 'Los miembros que ingresan desde este año están exentos del pago de admisión.' },
-      { key: 'legacy_member_cutoff_year', label: 'Año de corte de miembros antiguos', suffix: 'año', min: 2000, step: 1, hint: 'Define quiénes cuentan como "asociados antiguos" para efectos de retiro.' },
-    ],
-  },
-  {
     title: 'Ahorros',
     iconPath: 'M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z',
     fields: [
       { key: 'min_savings_minor', label: 'Cuota mínima mensual — menores', suffix: 'COP', min: 0, step: 1 },
       { key: 'min_savings_adult', label: 'Cuota mínima mensual — mayores', suffix: 'COP', min: 0, step: 1 },
-      { key: 'payment_deadline_day_january', label: 'Día límite de pago — enero', suffix: 'día', min: 1, max: 31, step: 1 },
-      { key: 'payment_deadline_day_regular', label: 'Día límite de pago — febrero a noviembre', suffix: 'día', min: 1, max: 31, step: 1, hint: 'Diciembre es flexible según la fecha de la reunión de fin de año.' },
     ],
   },
   {
     title: 'Moras y Sanciones',
     iconPath: 'M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z',
     fields: [
-      { key: 'missed_installments_for_expulsion', label: 'Cuotas atrasadas para expulsión', suffix: 'cuotas', min: 1, step: 1 },
-      { key: 'loan_default_months_for_deduction', label: 'Meses de mora para descuento automático', suffix: 'meses', min: 1, step: 1 },
       { key: 'penalty_absence', label: 'Multa por inasistencia', suffix: 'COP', min: 0, step: 1 },
       { key: 'penalty_late_arrival', label: 'Multa por llegada tarde', suffix: 'COP', min: 0, step: 1 },
     ],
@@ -67,11 +52,10 @@ const fieldGroups: FieldGroup[] = [
     ],
   },
   {
-    title: 'Cierre Anual y Junta',
+    title: 'Cierre Anual',
     iconPath: 'M21 11.25v8.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 1 0 9.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1 1 14.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z',
     fields: [
       { key: 'year_end_base', label: 'Base retenida de fin de año', suffix: 'COP', min: 0, step: 1 },
-      { key: 'board_min_seniority_years', label: 'Antigüedad mínima para la Junta', suffix: 'años', min: 0, step: 1 },
     ],
   },
 ]
@@ -98,47 +82,27 @@ const yearOptions = computed(() => {
 
 function emptyForm(): SettingsForm {
   return {
-    admission_fee: 0,
-    reentry_multiplier: 2,
-    enrollment_deadline_day: 31,
-    admission_exemption_year: new Date().getFullYear(),
-    legacy_member_cutoff_year: new Date().getFullYear(),
     min_savings_minor: 0,
     min_savings_adult: 0,
-    payment_deadline_day_january: 30,
-    payment_deadline_day_regular: 15,
-    missed_installments_for_expulsion: 3,
-    loan_default_months_for_deduction: 2,
     penalty_absence: 0,
     penalty_late_arrival: 0,
     min_interest_rate: 2,
     loan_limit_without_guarantor: 0,
     loan_savings_percentage_cap: 80,
     year_end_base: 0,
-    board_min_seniority_years: 3,
   }
 }
 
 function rowToForm(row: FundSettings): SettingsForm {
   return {
-    admission_fee: row.admission_fee,
-    reentry_multiplier: row.reentry_multiplier,
-    enrollment_deadline_day: row.enrollment_deadline_day,
-    admission_exemption_year: row.admission_exemption_year,
-    legacy_member_cutoff_year: row.legacy_member_cutoff_year,
     min_savings_minor: row.min_savings_minor,
     min_savings_adult: row.min_savings_adult,
-    payment_deadline_day_january: row.payment_deadline_day_january,
-    payment_deadline_day_regular: row.payment_deadline_day_regular,
-    missed_installments_for_expulsion: row.missed_installments_for_expulsion,
-    loan_default_months_for_deduction: row.loan_default_months_for_deduction,
     penalty_absence: row.penalty_absence,
     penalty_late_arrival: row.penalty_late_arrival,
     min_interest_rate: row.min_interest_rate,
     loan_limit_without_guarantor: row.loan_limit_without_guarantor,
     loan_savings_percentage_cap: row.loan_savings_percentage_cap,
     year_end_base: row.year_end_base,
-    board_min_seniority_years: row.board_min_seniority_years,
   }
 }
 

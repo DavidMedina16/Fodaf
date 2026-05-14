@@ -68,7 +68,7 @@ Tablas en PostgreSQL (Supabase), relacionadas mediante UUIDs:
 - `penalties` — (id, profile_id, meeting_id, reason, amount, status, created_at). Reason: `absence`, `late_arrival`, `other`. Status: `pending`, `paid`, `deducted_from_savings`.
 - `withdrawals` — (id, profile_id, amount, status, created_at). Status: `pending`, `approved`, `rejected`. Representa solicitudes de retiro de ahorros.
 - `investments` — (id, name, invested_amount, annual_interest_rate, start_date, end_date, status, actual_return, created_at). Status: `active`, `completed`. `actual_return` se llena cuando se finaliza la inversión y representa el rendimiento real obtenido (entra al Capital en Caja).
-- `fund_settings` — (year [PK], admission_fee, reentry_multiplier, enrollment_deadline_day, admission_exemption_year, legacy_member_cutoff_year, min_savings_minor, min_savings_adult, payment_deadline_day_january, payment_deadline_day_regular, missed_installments_for_expulsion, loan_default_months_for_deduction, penalty_absence, penalty_late_arrival, min_interest_rate, loan_limit_without_guarantor, loan_savings_percentage_cap, year_end_base, board_min_seniority_years, created_at, updated_at). Parámetros configurables del fondo, **una fila por año**. Se leen con el composable `useFundSettings()` y se editan desde `/admin/parametros`.
+- `fund_settings` — (year [PK], min_savings_minor, min_savings_adult, penalty_absence, penalty_late_arrival, min_interest_rate, loan_limit_without_guarantor, loan_savings_percentage_cap, year_end_base, created_at, updated_at). Parámetros configurables del fondo, **una fila por año**. Se leen con el composable `useFundSettings()` y se editan desde `/admin/parametros`. Solo contiene los parámetros que el código consume; las reglas de estatutos sin lógica implementada no se parametrizan.
 
 ## Parámetros Configurables del Fondo
 Los valores que cambian de año a año (cuotas, bases, límites, multas) **NO se hardcodean**. Viven en la tabla `fund_settings`, con **una fila por año** (`year` como PK).
@@ -78,14 +78,14 @@ Los valores que cambian de año a año (cuotas, bases, límites, multas) **NO se
 - Al agregar un parámetro nuevo: columna en una migración nueva, campo en la interfaz `FundSettings` (`types/database.ts`), y campo en `fieldGroups` de `/admin/parametros`.
 
 ## Reglas de Negocio y Estatutos (ESTRICTO)
-Valores vigentes según los **estatutos modificados en enero de 2026**. Son los valores por defecto que viven en `fund_settings` para el año 2026; la app siempre los lee desde ahí (vía `useFundSettings()`), nunca de constantes. El nombre entre paréntesis es la columna correspondiente.
+Valores vigentes según los **estatutos modificados en enero de 2026**. Las reglas anotadas con el nombre de una columna (ej. `min_interest_rate`) son **parametrizables**: viven en `fund_settings` y la app las lee con `useFundSettings()`, nunca de constantes. Las reglas **sin anotación** están documentadas como estatuto pero **no parametrizadas ni enforced en código** (su lógica aún no está implementada).
 
 ### Ingresos
-- Admisión de miembro nuevo: **$80.000 COP** (`admission_fee`).
-- Reingreso: **el doble** de la admisión (`reentry_multiplier` = 2 → $160.000 COP).
-- Plazo máximo para ingresar al fondo: **31 de enero** (`enrollment_deadline_day`).
-- Excepción: nuevos integrantes a partir de 2023 están exentos del pago de admisión (`admission_exemption_year`).
-- "Asociados antiguos" se definen por el año de corte 2022 (`legacy_member_cutoff_year`).
+- Admisión de miembro nuevo: **$80.000 COP**.
+- Reingreso: **el doble** de la admisión ($160.000 COP).
+- Plazo máximo para ingresar al fondo: **31 de enero**.
+- Excepción: nuevos integrantes a partir de 2023 están exentos del pago de admisión.
+- "Asociados antiguos" se definen por el año de corte 2022.
 
 ### Ahorros
 - Cuota mínima mensual para **menores**: **$100.000 COP** (`min_savings_minor`).
@@ -93,8 +93,8 @@ Valores vigentes según los **estatutos modificados en enero de 2026**. Son los 
 - El valor del ahorro se define con el primer pago y **no se puede modificar durante el año en curso**.
 
 ### Fechas de Pago
-- Cuota de **enero**: plazo máximo **día 30** (`payment_deadline_day_january`).
-- Cuota de **febrero a noviembre**: plazo máximo **día 15** (`payment_deadline_day_regular`).
+- Cuota de **enero**: plazo máximo **día 30**.
+- Cuota de **febrero a noviembre**: plazo máximo **día 15**.
 - **Diciembre**: flexible según la fecha de la reunión de fin de año.
 
 ### Préstamos
@@ -104,8 +104,8 @@ Valores vigentes según los **estatutos modificados en enero de 2026**. Son los 
 - Para montos superiores: se requiere un **codeudor** que sea miembro del fondo con capacidad suficiente.
 
 ### Moras y Sanciones
-- **Atraso de 3 cuotas de ahorro** (`missed_installments_for_expulsion`) → Expulsión del fondo. Durante el primer mes de atraso hay derecho, por única vez, a renegociación (primero con el Comité, luego con la Junta).
-- **Mora de 2 meses en préstamos** (`loan_default_months_for_deduction`) → Descuento automático de sus ahorros o los de su codeudor.
+- **Atraso de 3 cuotas de ahorro** → Expulsión del fondo. Durante el primer mes de atraso hay derecho, por única vez, a renegociación (primero con el Comité, luego con la Junta).
+- **Mora de 2 meses en préstamos** → Descuento automático de sus ahorros o los de su codeudor.
 - **Llegar 15 minutos tarde** a citaciones → Multa de **$10.000 COP** (`penalty_late_arrival`).
 - **Inasistencia a reuniones** → Multa de **$30.000 COP** (`penalty_absence`), descontada de los ahorros.
 
@@ -114,4 +114,4 @@ Valores vigentes según los **estatutos modificados en enero de 2026**. Son los 
 - Al final del año se devuelven los aportes dejando una **base de $350.000 COP** en el fondo (`year_end_base`).
 
 ### Junta Directiva
-- Se elige entre miembros con **3 años o más de antigüedad** (`board_min_seniority_years`). *(Parámetro disponible en `fund_settings`; aún no implementado en código.)*
+- Se elige entre miembros con **3 años o más de antigüedad**.

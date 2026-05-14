@@ -13,52 +13,90 @@ interface Article {
 
 const articles: Article[] = [
   {
-    id: 'ingresos',
-    title: 'Artículo I — Ingresos',
-    summary: 'Requisitos y cuotas de admisión y reingreso al fondo.',
+    id: 'ingreso',
+    title: 'Artículo I — Ingreso y Admisión',
+    summary: 'Solicitud, aprobación y cuotas de admisión y reingreso.',
     body:
-      'La admisión de un nuevo miembro al fondo tiene un costo de $70.000 COP, mientras que el reingreso de un miembro previamente retirado tiene un costo de $140.000 COP (el doble). ' +
-      'Los nuevos integrantes a partir del año 2023 están exentos del pago de admisión. ' +
-      'Todo aspirante deberá ser aceptado por la Junta Directiva y firmar conformidad con los presentes estatutos.',
+      'Para ingresar al fondo se deberá presentar la solicitud ante la asamblea, la cual deberá ser aprobada mediante votación. ' +
+      'El plazo máximo para ingresar al fondo es el 31 de enero del año en vigencia. ' +
+      'Cada miembro nuevo aportará una admisión de ochenta mil pesos ($80.000 COP); los miembros que reingresan al año inmediatamente después de haber retirado su aporte pagarán el doble ($160.000 COP). ' +
+      'Estos valores no serán devueltos a la salida final del miembro, sino que serán divididos proporcionalmente en partes iguales entre los integrantes activos al momento de la disolución del fondo.',
   },
   {
     id: 'ahorros',
     title: 'Artículo II — Ahorros',
-    summary: 'Cuotas mensuales obligatorias y fechas de pago.',
+    summary: 'Cuotas mínimas, definición del valor y fechas de pago.',
     body:
-      'La cuota mínima mensual para menores de edad es de $100.000 COP, y para mayores de edad es de $120.000 COP. ' +
-      'El valor del ahorro se define al ingresar al fondo y no puede modificarse durante todo el año en curso. ' +
-      'El plazo máximo de pago es el día 30 de cada mes, con excepción del mes de diciembre, cuya fecha límite es el día 15.',
+      'La cuota mínima de ahorro mensual es de cien mil pesos ($100.000 COP) para menores de edad y de ciento veinte mil pesos ($120.000 COP) para mayores de edad. ' +
+      'Al ingresar al fondo, el valor del ahorro mensual queda definido con la realización del primer pago y no podrá ser modificado durante el año en curso. ' +
+      'El plazo máximo para el pago de la cuota de enero es el 30 de enero. Desde febrero hasta diciembre, la cuota deberá efectuarse a más tardar el día 15 de cada mes; la cuota de diciembre queda sujeta a flexibilidad según la fecha de la reunión de fin de año. ' +
+      'La cuota podrá pagarse de manera semanal, quincenal o en un solo pago mensual.',
+  },
+  {
+    id: 'moras-ahorro',
+    title: 'Artículo III — Moras en el Ahorro',
+    summary: 'Atraso de cuotas, renegociación y expulsión.',
+    body:
+      'El miembro que incurra en el atraso de tres (3) cuotas será expulsado del fondo. ' +
+      'No obstante, durante el primer mes de atraso tendrá derecho, por una única vez, a un proceso de renegociación: en primera instancia con el Comité y, de ser necesario, en segunda instancia con la Junta. ' +
+      'Si no se logra un acuerdo en ninguna de estas instancias, el miembro será expulsado del fondo.',
   },
   {
     id: 'prestamos',
-    title: 'Artículo III — Préstamos',
-    summary: 'Condiciones, tasas y requisitos de codeudores.',
+    title: 'Artículo IV — Préstamos',
+    summary: 'Condiciones, límites, fiador y mora en créditos.',
     body:
-      'Solo los miembros activos del fondo pueden solicitar préstamos. La tasa de interés mínima es del 2% mensual. ' +
-      'Sin fiador, un miembro puede solicitar hasta $200.000 COP o el equivalente al 80% del valor ahorrado (lo que resulte menor). ' +
-      'Para montos superiores, se requiere un codeudor que sea miembro activo del fondo y cuente con capacidad de ahorro suficiente para respaldar la obligación.',
-  },
-  {
-    id: 'moras',
-    title: 'Artículo IV — Moras y Sanciones',
-    summary: 'Penalidades por incumplimiento y faltas.',
-    body:
-      'El atraso de tres cuotas consecutivas en el ahorro mensual genera la expulsión del fondo. ' +
-      'La mora de dos meses en préstamos activa el descuento automático sobre los ahorros del deudor o, en su defecto, sobre los del codeudor. ' +
-      'Llegar 15 minutos tarde a una citación genera una multa de $10.000 COP. La inasistencia a reuniones genera una multa de $30.000 COP que se descuenta directamente de los ahorros.',
+      'El dinero del fondo solo y únicamente se puede prestar a sus miembros, con un interés no menor al dos por ciento (2%). ' +
+      'El límite que se presta sin fiador es de quinientos mil pesos ($500.000 COP) o el 80% del valor ahorrado hasta el momento de la solicitud, lo que resulte menor. ' +
+      'Para valores superiores se requiere un fiador perteneciente al fondo, y la capacidad de ambos deberá cubrir el valor del préstamo. ' +
+      'Si el deudor queda en mora por dos (2) meses, automáticamente se le descontará el valor en mora de sus ahorros en el fondo; si sus ahorros no alcanzan, el descuento se aplicará sobre los ahorros del codeudor.',
   },
   {
     id: 'utilidades',
     title: 'Artículo V — Utilidades',
-    summary: 'Reparto anual y causales de pérdida del derecho.',
+    summary: 'Reparto por préstamos, base de fin de año y pérdida del derecho.',
     body:
-      'A la primera oportunidad de incumplimiento en la fecha de pago del ahorro mensual, el miembro pierde todo derecho a las utilidades anuales del fondo. ' +
-      'Al finalizar el año, se devuelven los aportes a cada miembro, dejando una base operativa de $300.000 COP en la caja del fondo para el siguiente período.',
+      'Las utilidades por préstamos serán divididas porcentualmente de acuerdo con el saldo que cada miembro tenga al cierre del año, siempre y cuando cumpla con la cuota de ahorro mensual a más tardar el día 15 del mes vigente. ' +
+      'A la primera oportunidad en que se halle el incumplimiento del ahorro mensual en la fecha estipulada, el miembro perderá automáticamente todo derecho a dichas utilidades. ' +
+      'Al final del año se devolverán los aportes, dejando todos los miembros una base de trescientos cincuenta mil pesos ($350.000 COP) de lo ahorrado. ' +
+      'Las personas antiguas que se retiran pierden cualquier beneficio de antigüedad, adaptándose a los estatutos vigentes a su reingreso.',
+  },
+  {
+    id: 'sanciones',
+    title: 'Artículo VI — Sanciones y Asistencia',
+    summary: 'Multas por inasistencia y retardo, y régimen de poderes.',
+    body:
+      'La sanción por inasistencia a las reuniones es de treinta mil pesos ($30.000 COP), descontada de los ahorros. ' +
+      'Se autoriza un máximo de dos (2) poderes consecutivos de un mismo usuario y un máximo de tres (3) poderes por usuario en un año calendario; los poderes deben hacerse llegar a la presidencia del fondo con un plazo no menor a seis (6) horas previas al inicio de la reunión citada (Acta No. 6). ' +
+      'El miembro que llegue después de quince (15) minutos de la hora estipulada a las citaciones —reuniones o actividades de integración— deberá pagar una multa de diez mil pesos ($10.000 COP). La aplicación y control de esta multa estará a cargo del Comité de Convivencia.',
+  },
+  {
+    id: 'actividades-inversiones',
+    title: 'Artículo VII — Actividades e Inversiones',
+    summary: 'Comité de actividades e inversiones para ingresos adicionales.',
+    body:
+      'Habrá un comité de actividades cuyas condiciones se fijarán en la reunión de inicio de año, con el fin de generar ingresos adicionales y promover la integración de los miembros. Un caso especial de no participación será discutido por la Junta. ' +
+      'Asimismo, el fondo realizará inversiones rentables cuyas condiciones serán definidas en la reunión de inicio de año y sometidas a votación, con el fin de generar ingresos adicionales.',
+  },
+  {
+    id: 'junta',
+    title: 'Artículo VIII — Junta Directiva',
+    summary: 'Requisitos de antigüedad y criterios de elección.',
+    body:
+      'La Junta será elegida entre los miembros con una antigüedad de tres (3) años o más, considerando criterios personales específicos como su continuidad, el pago a tiempo de sus obligaciones y su buen comportamiento personal y crediticio.',
+  },
+  {
+    id: 'retiros',
+    title: 'Artículo IX — Retiro de Miembros Antiguos',
+    summary: 'Devolución de dineros a asociados antiguos a 2022.',
+    body:
+      'A los asociados antiguos a 2022 que se retiren no se les retendrá ningún dinero de aportes ni de ahorros: se les devolverá todo el dinero que hayan allegado al fondo. ' +
+      'Sin embargo, si el retiro ocurre en un mes diferente a diciembre, el miembro perderá el derecho a recibir utilidades por los préstamos y las actividades realizadas en el año calendario (Acta No. 9). ' +
+      'Se exceptúa la entrega del dinero de la admisión para los nuevos integrantes que ingresan a partir de 2023.',
   },
 ]
 
-const openId = ref<string | null>('ingresos')
+const openId = ref<string | null>('ingreso')
 
 function toggle(id: string) {
   openId.value = openId.value === id ? null : id

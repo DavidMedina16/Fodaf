@@ -110,6 +110,46 @@ export interface Investment {
   created_at: string
 }
 
+/**
+ * Parámetros configurables del fondo, con histórico por año.
+ * Los valores cambian según los estatutos; cada año tiene su
+ * propia fila para preservar la integridad de cálculos pasados.
+ */
+export interface FundSettings {
+  year: number
+
+  // Ingreso y admisión
+  admission_fee: number
+  reentry_multiplier: number
+  enrollment_deadline_day: number
+  admission_exemption_year: number
+  legacy_member_cutoff_year: number
+
+  // Ahorros
+  min_savings_minor: number
+  min_savings_adult: number
+  payment_deadline_day_january: number
+  payment_deadline_day_regular: number
+
+  // Moras y sanciones
+  missed_installments_for_expulsion: number
+  loan_default_months_for_deduction: number
+  penalty_absence: number
+  penalty_late_arrival: number
+
+  // Préstamos
+  min_interest_rate: number
+  loan_limit_without_guarantor: number
+  loan_savings_percentage_cap: number
+
+  // Cierre anual y junta
+  year_end_base: number
+  board_min_seniority_years: number
+
+  created_at: string
+  updated_at: string
+}
+
 // ---- Database schema map (útil para tipado genérico) ----
 
 export interface Database {
@@ -124,4 +164,5 @@ export interface Database {
   penalties: Penalty
   withdrawals: Withdrawal
   investments: Investment
+  fund_settings: FundSettings
 }

@@ -1,10 +1,10 @@
 <script setup lang="ts">
+import type { FundSettings } from '~~/types/database'
+
 definePageMeta({
   middleware: 'admin',
   layout: 'default',
 })
-
-const FONDO_BASE = 300_000
 
 interface SettlementRow {
   profile_id: string
@@ -18,13 +18,48 @@ const supabase = useSupabase()
 const toast = useToast()
 
 const loading = ref(true)
+const availableYears = ref<number[]>([])
+const selectedYear = ref<number>(new Date().getFullYear())
+const fundSettings = ref<FundSettings | null>(null)
 const totalActivityProfits = ref(0)
 const totalPenaltiesCollected = ref(0)
 const settlement = ref<SettlementRow[]>([])
 
-const currentYear = new Date().getFullYear()
+/** Base que se retiene en el fondo, según los parámetros del año liquidado. */
+const yearEndBase = computed(() => fundSettings.value?.year_end_base ?? 0)
+
+/** `true` si el año seleccionado no tiene parámetros configurados. */
+const yearNotConfigured = computed(() => !loading.value && !fundSettings.value)
+
+/** Años a ofrecer en el selector: los que tienen parámetros configurados. */
+const yearOptions = computed(() => {
+  const set = new Set(availableYears.value)
+  set.add(selectedYear.value)
+  return Array.from(set).sort((a, b) => b - a)
+})
+
+async function loadYears() {
+  const { data } = await supabase
+    .from('fund_settings')
+    .select('year')
+    .order('year', { ascending: false })
+
+  availableYears.value = (data ?? []).map(r => r.year as number)
+  // Si el año actual no está configurado, usar el más reciente disponible.
+  if (!availableYears.value.includes(selectedYear.value) && availableYears.value.length) {
+    selectedYear.value = availableYears.value[0]!
+  }
+}
 
 async function loadData() {
+  loading.value = true
+
+  const year = selectedYear.value
+  const yearStart = `${year}-01-01`
+  const nextYearStart = `${year + 1}-01-01`
+
+  fundSettings.value = await useFundSettings(year).load()
+
   const [
     profilesResult,
     activitiesResult,
@@ -39,23 +74,33 @@ async function loadData() {
       .order('full_name'),
     supabase
       .from('activities')
-      .select('net_profits'),
+      .select('net_profits')
+      .gte('activity_date', yearStart)
+      .lt('activity_date', nextYearStart),
     supabase
       .from('penalties')
       .select('amount')
-      .in('status', ['paid', 'deducted_from_savings']),
+      .in('status', ['paid', 'deducted_from_savings'])
+      .gte('created_at', yearStart)
+      .lt('created_at', nextYearStart),
     supabase
       .from('contributions')
       .select('profile_id, amount')
-      .eq('status', 'approved'),
+      .eq('status', 'approved')
+      .gte('deposit_date', yearStart)
+      .lt('deposit_date', nextYearStart),
     supabase
       .from('withdrawals')
       .select('profile_id, amount')
-      .eq('status', 'approved'),
+      .eq('status', 'approved')
+      .gte('created_at', yearStart)
+      .lt('created_at', nextYearStart),
     supabase
       .from('penalties')
       .select('profile_id, amount')
-      .eq('status', 'deducted_from_savings'),
+      .eq('status', 'deducted_from_savings')
+      .gte('created_at', yearStart)
+      .lt('created_at', nextYearStart),
   ])
 
   totalActivityProfits.value = (activitiesResult.data ?? [])
@@ -81,7 +126,7 @@ async function loadData() {
 
   const profiles = profilesResult.data ?? []
   const totalExtra = totalActivityProfits.value + totalPenaltiesCollected.value
-  const utility = Math.max(0, totalExtra - FONDO_BASE)
+  const utility = Math.max(0, totalExtra - yearEndBase.value)
   const bonus = profiles.length > 0 ? utility / profiles.length : 0
 
   settlement.value = profiles.map(p => {
@@ -108,10 +153,10 @@ const totalExtraIncome = computed(
 )
 
 const utilityToDistribute = computed(
-  () => Math.max(0, totalExtraIncome.value - FONDO_BASE),
+  () => Math.max(0, totalExtraIncome.value - yearEndBase.value),
 )
 
-const baseNotReached = computed(() => totalExtraIncome.value < FONDO_BASE)
+const baseNotReached = computed(() => totalExtraIncome.value < yearEndBase.value)
 
 const memberCount = computed(() => settlement.value.length)
 
@@ -127,7 +172,10 @@ function handleExportPdf() {
   toast.success('La exportación a PDF estará disponible próximamente.')
 }
 
-onMounted(loadData)
+onMounted(async () => {
+  await loadYears()
+  await loadData()
+})
 </script>
 
 <template>
@@ -146,24 +194,40 @@ onMounted(loadData)
               </svg>
             </span>
             <span class="text-[11px] uppercase tracking-widest text-amber-300/80 font-semibold">
-              Cierre {{ currentYear }}
+              Cierre {{ selectedYear }}
             </span>
           </div>
           <h1 class="text-3xl font-bold text-white">Liquidación de Fin de Año</h1>
           <p class="text-gray-400 mt-1 max-w-2xl">
             Cálculo del reparto de utilidades entre los miembros del fondo según los estatutos.
-            Se retiene una base de {{ formatCOP(FONDO_BASE) }} para arrancar el siguiente ciclo.
+            Se retiene una base de {{ formatCOP(yearEndBase) }} para arrancar el siguiente ciclo.
           </p>
         </div>
-        <button
-          class="shrink-0 inline-flex items-center gap-2 rounded-lg bg-white/10 hover:bg-white/15 border border-white/15 px-4 py-2.5 text-sm font-semibold text-white backdrop-blur transition"
-          @click="handleExportPdf"
-        >
-          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
-          </svg>
-          Exportar Liquidación a PDF
-        </button>
+        <div class="flex flex-col items-end gap-3">
+          <div>
+            <label class="block text-[11px] uppercase tracking-widest text-amber-300/80 font-semibold mb-1">
+              Año a liquidar
+            </label>
+            <select
+              v-model.number="selectedYear"
+              class="rounded-lg bg-white/10 border border-white/15 px-4 py-2 text-sm font-semibold text-white backdrop-blur focus:border-amber-400 focus:ring-1 focus:ring-amber-400 outline-none transition"
+              @change="loadData"
+            >
+              <option v-for="year in yearOptions" :key="year" :value="year" class="text-gray-900">
+                {{ year }}
+              </option>
+            </select>
+          </div>
+          <button
+            class="shrink-0 inline-flex items-center gap-2 rounded-lg bg-white/10 hover:bg-white/15 border border-white/15 px-4 py-2.5 text-sm font-semibold text-white backdrop-blur transition"
+            @click="handleExportPdf"
+          >
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+            </svg>
+            Exportar Liquidación a PDF
+          </button>
+        </div>
       </div>
     </div>
 
@@ -178,9 +242,28 @@ onMounted(loadData)
     </div>
 
     <template v-else>
+      <!-- Aviso: año sin parámetros configurados -->
+      <div
+        v-if="yearNotConfigured"
+        class="mb-6 rounded-2xl border border-red-500/30 bg-red-500/10 p-5 flex items-start gap-3"
+      >
+        <svg class="h-6 w-6 shrink-0 text-red-400 mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+        </svg>
+        <div>
+          <p class="text-sm font-semibold text-red-400">
+            El año {{ selectedYear }} no tiene parámetros configurados.
+          </p>
+          <p class="text-xs text-red-400/70 mt-1">
+            La base de fin de año se está tomando como {{ formatCOP(0) }}. Configura los
+            parámetros del año en la sección <strong>Parámetros</strong> para una liquidación correcta.
+          </p>
+        </div>
+      </div>
+
       <!-- Aviso si no se supera la base -->
       <div
-        v-if="baseNotReached"
+        v-else-if="baseNotReached"
         class="mb-6 rounded-2xl border border-yellow-500/30 bg-yellow-500/10 p-5 flex items-start gap-3"
       >
         <svg class="h-6 w-6 shrink-0 text-yellow-400 mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
@@ -192,7 +275,7 @@ onMounted(loadData)
           </p>
           <p class="text-xs text-yellow-400/70 mt-1">
             Los ingresos extra ({{ formatCOP(totalExtraIncome) }}) no superan la base intocable
-            de {{ formatCOP(FONDO_BASE) }}, por lo que aún no hay utilidades para repartir.
+            de {{ formatCOP(yearEndBase) }}, por lo que aún no hay utilidades para repartir.
           </p>
         </div>
       </div>
@@ -239,7 +322,7 @@ onMounted(loadData)
             </p>
           </div>
           <p class="text-2xl font-bold text-white">
-            {{ formatCOP(FONDO_BASE) }}
+            {{ formatCOP(yearEndBase) }}
           </p>
           <p class="text-xs text-gray-500 mt-3">
             Capital que queda en el fondo para arrancar el siguiente año.

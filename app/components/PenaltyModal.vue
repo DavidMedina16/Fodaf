@@ -15,25 +15,38 @@ const emit = defineEmits<{
   saved: []
 }>()
 
+type PenaltyReason = 'absence' | 'late_arrival' | 'other'
+
 const supabase = useSupabase()
 const toast = useToast()
+const { settings: fundSettings } = useFundSettings()
 
 const profileId = ref('')
-const reason = ref<'absence' | 'late_arrival' | 'other'>('absence')
-const amount = ref(30000)
+const reason = ref<PenaltyReason>('absence')
+const amount = ref(0)
 const submitting = ref(false)
 
-watch(reason, (val) => {
-  if (val === 'absence') amount.value = 30000
-  else if (val === 'late_arrival') amount.value = 10000
-  else amount.value = 0
-})
-
-const reasonLabel: Record<string, string> = {
-  absence: 'Inasistencia — $30.000',
-  late_arrival: 'Llegada tarde (15+ min) — $10.000',
-  other: 'Otro motivo',
+/** Monto de multa definido por los estatutos para un motivo dado. */
+function penaltyAmountFor(r: PenaltyReason): number {
+  if (!fundSettings.value) return 0
+  if (r === 'absence') return fundSettings.value.penalty_absence
+  if (r === 'late_arrival') return fundSettings.value.penalty_late_arrival
+  return 0
 }
+
+// Mantiene el monto sincronizado con el motivo y los parámetros del fondo.
+// Para "otro motivo" el monto queda libre para que el admin lo defina.
+watch([reason, fundSettings], () => {
+  if (reason.value !== 'other') {
+    amount.value = penaltyAmountFor(reason.value)
+  }
+}, { immediate: true })
+
+const reasonLabel = computed<Record<string, string>>(() => ({
+  absence: `Inasistencia — ${formatCOP(penaltyAmountFor('absence'))}`,
+  late_arrival: `Llegada tarde (15+ min) — ${formatCOP(penaltyAmountFor('late_arrival'))}`,
+  other: 'Otro motivo',
+}))
 
 const isAmountReadonly = computed(() => reason.value !== 'other')
 
@@ -60,7 +73,7 @@ async function handleSubmit() {
   toast.success('Multa registrada correctamente.')
   profileId.value = ''
   reason.value = 'absence'
-  amount.value = 30000
+  amount.value = penaltyAmountFor('absence')
   emit('saved')
   emit('close')
 }

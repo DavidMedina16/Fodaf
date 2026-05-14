@@ -12,6 +12,7 @@ definePageMeta({
 const supabase = useSupabase()
 const router = useRouter()
 const toast = useToast()
+const { settings: fundSettings, load: loadFundSettings } = useFundSettings()
 
 const totalSavings = ref(0)
 const members = ref<ProfileOption[]>([])
@@ -37,6 +38,7 @@ onMounted(async () => {
       .from('profiles')
       .select('id, full_name')
       .neq('id', user.id),
+    loadFundSettings(),
   ])
 
   totalSavings.value = savingsResult.data
@@ -44,17 +46,21 @@ onMounted(async () => {
     : 0
 
   members.value = (membersResult.data as ProfileOption[]) ?? []
+  interestRate.value = fundSettings.value?.min_interest_rate ?? 2
   loading.value = false
 })
 
 const maxWithoutGuarantor = computed(() => {
-  const eightyPercent = Math.floor(totalSavings.value * 0.8)
-  return Math.min(200000, eightyPercent)
+  if (!fundSettings.value) return 0
+  const savingsCap = Math.floor(
+    totalSavings.value * (fundSettings.value.loan_savings_percentage_cap / 100),
+  )
+  return Math.min(fundSettings.value.loan_limit_without_guarantor, savingsCap)
 })
 
 const requiresGuarantor = computed(() => {
   if (!requestedAmount.value) return false
-  return requestedAmount.value > 200000 || requestedAmount.value > totalSavings.value * 0.8
+  return requestedAmount.value > maxWithoutGuarantor.value
 })
 
 const totalDue = computed(() => {
@@ -72,7 +78,7 @@ function formatCOP(value: number): string {
 
 async function handleSubmit() {
   if (!requestedAmount.value || requestedAmount.value <= 0) return
-  if (interestRate.value < 2) return
+  if (interestRate.value < (fundSettings.value?.min_interest_rate ?? 2)) return
   if (!installments.value || installments.value < 1) return
   if (requiresGuarantor.value && !guarantorId.value) return
 
@@ -162,11 +168,13 @@ async function handleSubmit() {
             v-model.number="interestRate"
             type="number"
             required
-            min="2"
+            :min="fundSettings?.min_interest_rate ?? 2"
             step="0.5"
             class="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-2.5 text-white placeholder-gray-500 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition"
           />
-          <p class="text-xs text-gray-500 mt-1">Mínimo 2% según estatutos.</p>
+          <p class="text-xs text-gray-500 mt-1">
+            Mínimo {{ fundSettings?.min_interest_rate ?? 2 }}% según estatutos.
+          </p>
         </div>
 
         <!-- Cuotas -->

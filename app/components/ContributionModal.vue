@@ -10,6 +10,7 @@ const emit = defineEmits<{
 
 const supabase = useSupabase()
 const toast = useToast()
+const { settings: fundSettings } = useFundSettings()
 
 const amount = ref<number | null>(null)
 const { toLocalDate } = useLocalDate()
@@ -17,7 +18,7 @@ const depositDate = ref(toLocalDate())
 const submitting = ref(false)
 
 async function handleSubmit() {
-  if (!amount.value || amount.value < 100000) return
+  if (!amount.value || amount.value < (fundSettings.value?.min_savings_minor ?? 100000)) return
 
   submitting.value = true
 
@@ -93,13 +94,14 @@ async function handleSubmit() {
                 v-model.number="amount"
                 type="number"
                 required
-                min="100000"
+                :min="fundSettings?.min_savings_minor ?? 100000"
                 step="1000"
-                placeholder="120000"
+                :placeholder="String(fundSettings?.min_savings_adult ?? 120000)"
                 class="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-2.5 text-white placeholder-gray-500 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition"
               />
               <p class="text-xs text-gray-500 mt-1">
-                Mínimo: $100.000 (menores) / $120.000 (mayores)
+                Mínimo: {{ formatCOP(fundSettings?.min_savings_minor ?? 100000) }} (menores)
+                / {{ formatCOP(fundSettings?.min_savings_adult ?? 120000) }} (mayores)
               </p>
             </div>
 

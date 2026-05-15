@@ -49,6 +49,7 @@ const navSections: NavSection[] = [
       { to: '/dashboard', label: 'Inicio', icon: 'home' },
       { to: '/extracto', label: 'Mis Movimientos', icon: 'list' },
       { to: '/prestamos', label: 'Préstamos', icon: 'banknotes' },
+      { to: '/actividades', label: 'Actividades', icon: 'sparkles' },
     ],
   },
   {
@@ -66,7 +67,6 @@ const navSections: NavSection[] = [
       { to: '/admin/miembros', label: 'Miembros', icon: 'users' },
       { to: '/admin/retiros', label: 'Retiros', icon: 'banknotes' },
       { to: '/admin/reuniones', label: 'Reuniones', icon: 'calendar' },
-      { to: '/admin/actividades', label: 'Actividades', icon: 'sparkles' },
       { to: '/admin/inversiones', label: 'Inversiones', icon: 'trending' },
       { to: '/admin/balance', label: 'Balance', icon: 'chart' },
       { to: '/admin/cierre-anual', label: 'Cierre Anual', icon: 'gift' },

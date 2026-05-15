@@ -28,3 +28,18 @@ export function formatDate(dateStr: string): string {
     year: 'numeric',
   })
 }
+
+/**
+ * Formatea fecha + hora en hora local Colombia. Para timestamptz
+ * (ej. `start_at` de actividades). Devuelve algo como
+ * "18 mayo de 2026, 03:00 p. m.".
+ */
+export function formatDatetime(isoStr: string): string {
+  return new Date(isoStr).toLocaleString('es-CO', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}

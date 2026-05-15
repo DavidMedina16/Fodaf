@@ -13,52 +13,135 @@ interface Article {
 
 const articles: Article[] = [
   {
-    id: 'ingresos',
-    title: 'Artículo I — Ingresos',
-    summary: 'Requisitos y cuotas de admisión y reingreso al fondo.',
+    id: 'articulo-1',
+    title: 'Artículo 1 — Ingreso al fondo',
+    summary: 'Solicitud de ingreso aprobada por votación de la asamblea.',
     body:
-      'La admisión de un nuevo miembro al fondo tiene un costo de $70.000 COP, mientras que el reingreso de un miembro previamente retirado tiene un costo de $140.000 COP (el doble). ' +
-      'Los nuevos integrantes a partir del año 2023 están exentos del pago de admisión. ' +
-      'Todo aspirante deberá ser aceptado por la Junta Directiva y firmar conformidad con los presentes estatutos.',
+      'Para ingresar al fondo deberá solicitar a la asamblea su petición, la cual deberá ser aprobada por medio de votación.',
   },
   {
-    id: 'ahorros',
-    title: 'Artículo II — Ahorros',
-    summary: 'Cuotas mensuales obligatorias y fechas de pago.',
+    id: 'articulo-2',
+    title: 'Artículo 2 — Plazo de ingreso',
+    summary: 'Fecha límite para ingresar al fondo cada año.',
     body:
-      'La cuota mínima mensual para menores de edad es de $100.000 COP, y para mayores de edad es de $120.000 COP. ' +
-      'El valor del ahorro se define al ingresar al fondo y no puede modificarse durante todo el año en curso. ' +
-      'El plazo máximo de pago es el día 30 de cada mes, con excepción del mes de diciembre, cuya fecha límite es el día 15.',
+      'El plazo máximo para ingresar al fondo es el 31 de enero del año en vigencia.',
   },
   {
-    id: 'prestamos',
-    title: 'Artículo III — Préstamos',
-    summary: 'Condiciones, tasas y requisitos de codeudores.',
+    id: 'articulo-3',
+    title: 'Artículo 3 — Cuota de admisión y reingreso',
+    summary: 'Valor de admisión, reingreso y destino del dinero.',
     body:
-      'Solo los miembros activos del fondo pueden solicitar préstamos. La tasa de interés mínima es del 2% mensual. ' +
-      'Sin fiador, un miembro puede solicitar hasta $200.000 COP o el equivalente al 80% del valor ahorrado (lo que resulte menor). ' +
-      'Para montos superiores, se requiere un codeudor que sea miembro activo del fondo y cuente con capacidad de ahorro suficiente para respaldar la obligación.',
+      'Cada miembro nuevo, para ingresar, aportará una admisión de ochenta mil pesos ($80.000) m/cte; y los miembros que reingresan al año inmediatamente de haberse retirado, su aporte será el doble de lo anteriormente estipulado. ' +
+      'Estos valores no serán devueltos a su salida final del fondo, sino que serán proporcionalmente divididos en partes iguales entre los integrantes que estén activos en el momento de la disolución del fondo.',
   },
   {
-    id: 'moras',
-    title: 'Artículo IV — Moras y Sanciones',
-    summary: 'Penalidades por incumplimiento y faltas.',
+    id: 'articulo-4',
+    title: 'Artículo 4 — Cuota mínima de ahorro',
+    summary: 'Monto mínimo mensual para menores y mayores de edad.',
     body:
-      'El atraso de tres cuotas consecutivas en el ahorro mensual genera la expulsión del fondo. ' +
-      'La mora de dos meses en préstamos activa el descuento automático sobre los ahorros del deudor o, en su defecto, sobre los del codeudor. ' +
-      'Llegar 15 minutos tarde a una citación genera una multa de $10.000 COP. La inasistencia a reuniones genera una multa de $30.000 COP que se descuenta directamente de los ahorros.',
+      'La cuota mínima de ahorro mensual para menores de edad es de cien mil pesos m/cte ($100.000) y para mayores es de ciento veinte mil pesos m/cte ($120.000).',
   },
   {
-    id: 'utilidades',
-    title: 'Artículo V — Utilidades',
-    summary: 'Reparto anual y causales de pérdida del derecho.',
+    id: 'articulo-5',
+    title: 'Artículo 5 — Fechas de pago de la cuota',
+    summary: 'Plazos de pago mensual y modalidades.',
     body:
-      'A la primera oportunidad de incumplimiento en la fecha de pago del ahorro mensual, el miembro pierde todo derecho a las utilidades anuales del fondo. ' +
-      'Al finalizar el año, se devuelven los aportes a cada miembro, dejando una base operativa de $300.000 COP en la caja del fondo para el siguiente período.',
+      'El plazo máximo para el pago de la cuota correspondiente al mes de enero será el 30 de enero. La cuota mensual de ahorro, desde febrero hasta diciembre, deberá efectuarse a más tardar el día 15 de cada mes; no obstante, la cuota del mes de diciembre quedará sujeta a flexibilidad, de acuerdo con la fecha de la reunión de fin de año. La cuota podrá pagarse de manera semanal, quincenal o en un solo pago mensual.',
+  },
+  {
+    id: 'articulo-6',
+    title: 'Artículo 6 — Atraso de cuotas',
+    summary: 'Expulsión por mora y proceso de renegociación.',
+    body:
+      'El miembro que incurra en el atraso de tres (3) cuotas será expulsado del fondo. No obstante, durante el primer mes de atraso tendrá derecho, por una única vez, a un proceso de renegociación: en primera instancia con el Comité y, de ser necesario, en segunda instancia con la Junta. Si no se logra un acuerdo en ninguna de estas instancias, el miembro será expulsado del fondo.',
+  },
+  {
+    id: 'articulo-7',
+    title: 'Artículo 7 — Préstamos e interés',
+    summary: 'El fondo solo presta a sus miembros, con interés mínimo.',
+    body:
+      'El dinero del fondo solo y únicamente se puede prestar a sus miembros, con un interés no menor al dos por ciento (2%).',
+  },
+  {
+    id: 'articulo-8',
+    title: 'Artículo 8 — Préstamos sin fiador',
+    summary: 'Límite sin fiador y requisito de codeudor.',
+    body:
+      'El límite de dinero que se presta sin fiador es de quinientos mil pesos m/cte ($500.000) o el 80% del valor ahorrado hasta el momento en que se está solicitando el crédito. Para valores superiores se requiere un fiador perteneciente al fondo, y que la capacidad de ambos alcance para cubrir el valor del préstamo.',
+  },
+  {
+    id: 'articulo-9',
+    title: 'Artículo 9 — Mora en el pago de créditos',
+    summary: 'Descuento automático de ahorros del deudor o codeudor.',
+    body:
+      'Sobre el pago de los créditos, si el deudor queda en mora por 2 meses, automáticamente se le descuenta el valor en mora de los ahorros que tenga en el fondo; y en dado caso que al deudor no le alcancen sus ahorros para pagar el crédito o lo que tenga en mora, automáticamente se les descontará a los ahorros del codeudor.',
+  },
+  {
+    id: 'articulo-10',
+    title: 'Artículo 10 — Utilidades por préstamos',
+    summary: 'Reparto de utilidades y pérdida del derecho por incumplimiento.',
+    body:
+      'Las utilidades por préstamos serán divididas porcentualmente de acuerdo al saldo que tenga al cierre del año actual, siempre y cuando cumpla con la cuota de ahorro mensual máximo hasta el 15 del mes vigente, sujeto a lo establecido en el ítem 5 del presente estatuto. A la primera oportunidad en que se halle el incumplimiento del ahorro mensual en la fecha estipulada, automáticamente perderá todo derecho a dichas utilidades.',
+  },
+  {
+    id: 'articulo-11',
+    title: 'Artículo 11 — Cierre de año',
+    summary: 'Devolución de aportes y base que queda en el fondo.',
+    body:
+      'Al final del año se devolverán los aportes, dejando todos los miembros una base de 350 mil de lo ahorrado. Las personas antiguas que se retiran pierden cualquier beneficio de antigüedad, adaptándose a los estatutos vigentes a su reingreso.',
+  },
+  {
+    id: 'articulo-12',
+    title: 'Artículo 12 — Comité de actividades',
+    summary: 'Actividades para integración e ingresos adicionales.',
+    body:
+      'Habrá comité de actividades cuyas condiciones se fijarán en la reunión de inicio de año, con el fin de generar ingresos adicionales. Es importante reiterar que el fin de las actividades es la integración de los miembros, más que las utilidades del mismo. Cabe resaltar que, habiendo un caso especial de no participación, será discutido por la junta.',
+  },
+  {
+    id: 'articulo-13',
+    title: 'Artículo 13 — Sanción por inasistencia y poderes',
+    summary: 'Multa por inasistencia a reuniones y régimen de poderes.',
+    body:
+      'El valor de la sanción por inasistencia a las reuniones es de treinta mil pesos ($30.000). Se autoriza un máximo de dos (2) poderes consecutivos de un mismo usuario y un máximo de tres (3) poderes por usuario en un año calendario. Los poderes se deben hacer llegar a la presidencia del fondo con un plazo no menor a seis (6) horas previas al inicio de la reunión citada (Acta No. 6). Este valor será descontado de los ahorros.',
+  },
+  {
+    id: 'articulo-14',
+    title: 'Artículo 14 — Retiro de asociados antiguos',
+    summary: 'Devolución de dineros a asociados antiguos a 2022.',
+    body:
+      'A los asociados antiguos a 2022 que se retiren no se les retendrá ningún dinero de aportes ni de ahorros; se les devolverá todo el dinero que hayan allegado al fondo. Sin embargo, si se retira en un mes diferente al mes de diciembre, perderá el derecho a recibir utilidades por los préstamos y las actividades realizadas en el año calendario (Acta No. 9). Se exceptúa la entrega del dinero de la admisión para los nuevos integrantes que ingresan a partir del 2023.',
+  },
+  {
+    id: 'articulo-15',
+    title: 'Artículo 15 — Valor del ahorro mensual',
+    summary: 'Definición e inmutabilidad del valor durante el año.',
+    body:
+      'Al ingresar al fondo, el valor del ahorro mensual quedará definido con la realización del primer pago de ahorro. Dicho valor será el monto que el miembro se compromete a ahorrar mensualmente y no podrá ser modificado durante el año en curso, sujeto a lo establecido en el ítem 6 del presente estatuto.',
+  },
+  {
+    id: 'articulo-16',
+    title: 'Artículo 16 — Elección de la Junta',
+    summary: 'Antigüedad y criterios para integrar la Junta.',
+    body:
+      'La junta será elegida con miembros a partir de 3 años de antigüedad, con criterios personales específicos como su continuidad, pagos a tiempo y buen comportamiento personal y crediticio.',
+  },
+  {
+    id: 'articulo-17',
+    title: 'Artículo 17 — Sanción por llegada tarde',
+    summary: 'Multa por llegar tarde a las citaciones.',
+    body:
+      'El miembro que llegue después de quince (15) minutos de la hora estipulada a las citaciones, ya sean reuniones o actividades de integración del fondo de ahorros familiar, deberá pagar una multa de diez mil pesos ($10.000). La aplicación y control de esta multa estará a cargo del Comité de Convivencia.',
+  },
+  {
+    id: 'articulo-18',
+    title: 'Artículo 18 — Inversiones del fondo',
+    summary: 'Inversiones rentables aprobadas por votación.',
+    body:
+      'El fondo realizará inversiones rentables cuyas condiciones serán definidas en la reunión de inicio de año, con el fin de generar ingresos adicionales, las cuales serán sometidas a votación.',
   },
 ]
 
-const openId = ref<string | null>('ingresos')
+const openId = ref<string | null>('articulo-1')
 
 function toggle(id: string) {
   openId.value = openId.value === id ? null : id
